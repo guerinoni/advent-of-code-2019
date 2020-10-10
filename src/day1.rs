@@ -85,14 +85,14 @@ mod tests {
     use super::*;
 
     #[test]
-    fn check_part1() {
+    fn day1_part1() {
         let simple_input: Vec<u64> = vec![1969];
         assert_eq!(part1(&simple_input), 654.0);
         assert_eq!(part1(INPUT), 3394106.0);
     }
 
     #[test]
-    fn check_part2() {
+    fn day1_part2() {
         let simple_input: Vec<u64> = vec![1969];
         assert_eq!(part2(&simple_input), 966.0);
         assert_eq!(part2(INPUT), 5088280.0);

@@ -170,7 +170,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn check_simple() {
+    fn day2_simple() {
         assert_eq!(process(&[1, 0, 0, 0, 99]).unwrap(), [2, 0, 0, 0, 99]);
         assert_eq!(process(&[2, 3, 0, 3, 99]).unwrap(), [2, 3, 0, 6, 99]);
         assert_eq!(
@@ -180,7 +180,7 @@ mod tests {
     }
 
     #[test]
-    fn check_medium() {
+    fn day2_medium() {
         assert_eq!(
             process(&[1, 1, 1, 4, 99, 5, 6, 0, 99]).unwrap(),
             [30, 1, 1, 4, 2, 5, 6, 0, 99]
@@ -188,7 +188,7 @@ mod tests {
     }
 
     #[test]
-    fn check_early_halt() {
+    fn day2_early_halt() {
         assert_eq!(
             process(&[1, 1, 1, 2, 99, 5, 6, 0, 99]).unwrap(),
             [1, 1, 2, 2, 99, 5, 6, 0, 99]
@@ -196,7 +196,7 @@ mod tests {
     }
 
     #[test]
-    fn check_official() {
+    fn day2_all() {
         let mut official = vec![
             1, 0, 0, 3, 1, 1, 2, 3, 1, 3, 4, 3, 1, 5, 0, 3, 2, 10, 1, 19, 1, 5, 19, 23, 1, 23, 5,
             27, 2, 27, 10, 31, 1, 5, 31, 35, 2, 35, 6, 39, 1, 6, 39, 43, 2, 13, 43, 47, 2, 9, 47,
