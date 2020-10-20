@@ -46,6 +46,7 @@ fn calculate_fuel(v: u64) -> f64 {
 }
 
 /*
+ * --- Part Two ---
  * During the second Go / No Go poll, the Elf in charge of the Rocket Equation Double-Checker stops the launch sequence.
  * Apparently, you forgot to include additional fuel for the fuel you just added.
  *
