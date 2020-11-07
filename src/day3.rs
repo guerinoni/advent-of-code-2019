@@ -79,16 +79,16 @@ impl Line {
 
         let max = std::cmp::max(self.to.x, self.from.x);
         let min = std::cmp::min(self.to.x, self.from.x);
-        return (max - min).abs() as u64;
+        (max - min).abs() as u64
     }
 }
 
-fn get_points(vector: &Vec<&str>) -> Vec<Point> {
+fn get_points(vector: &[&str]) -> Vec<Point> {
     let origin = Point { x: 0, y: 0 };
     let mut points = vec![origin];
 
     for str in vector {
-        let dir = str.chars().nth(0).unwrap();
+        let dir = str.chars().next().unwrap();
         let num = str[1..].trim().parse::<i32>().unwrap();
         let old_p = points.last().unwrap();
         let mut new_p = Point {
@@ -109,7 +109,7 @@ fn get_points(vector: &Vec<&str>) -> Vec<Point> {
     points
 }
 
-fn make_lines(points: &Vec<Point>) -> Vec<Line> {
+fn make_lines(points: &[Point]) -> Vec<Line> {
     let mut j: usize = 2;
     let mut lines = vec![Line {
         from: points[0],
@@ -159,7 +159,7 @@ fn get_intersection(v: &Line, vv: &Line) -> Option<Point> {
     None
 }
 
-fn find_min_intersection_distance(v1: &Vec<Line>, v2: &Vec<Line>) -> u64 {
+fn find_min_intersection_distance(v1: &[Line], v2: &[Line]) -> u64 {
     let mut intersections = vec![];
     for v in v1 {
         for vv in v2 {
@@ -180,12 +180,11 @@ fn find_min_intersection_distance(v1: &Vec<Line>, v2: &Vec<Line>) -> u64 {
     manhattan(&origin, &min)
 }
 
-fn part1(wire1: &Vec<&str>, wire2: &Vec<&str>) -> u64 {
+fn part1(wire1: &[&str], wire2: &[&str]) -> u64 {
     let points1 = get_points(wire1);
     let points2 = get_points(wire2);
     let lines1 = make_lines(&points1);
     let lines2 = make_lines(&points2);
-
     find_min_intersection_distance(&lines1, &lines2)
 }
 
@@ -230,7 +229,7 @@ fn distance(p1: &Point, p2: &Point) -> f64 {
     v.sqrt()
 }
 
-fn find_min_steps(w1: &Vec<Line>, w2: &Vec<Line>) -> u64 {
+fn find_min_steps(w1: &[Line], w2: &[Line]) -> u64 {
     let origin = Point { x: 0, y: 0 };
 
     let mut min_steps = std::u64::MAX;
@@ -258,7 +257,7 @@ fn find_min_steps(w1: &Vec<Line>, w2: &Vec<Line>) -> u64 {
     min_steps
 }
 
-fn part2(wire1: &Vec<&str>, wire2: &Vec<&str>) -> u64 {
+fn part2(wire1: &[&str], wire2: &[&str]) -> u64 {
     let points1 = get_points(wire1);
     let points2 = get_points(wire2);
     let lines1 = make_lines(&points1);

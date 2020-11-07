@@ -25,7 +25,7 @@
  * What is the sum of the fuel requirements for all of the modules on your spacecraft?
  */
 
-static INPUT: &'static [u64] = &[
+static INPUT: & [u64] = &[
     94735, 80130, 127915, 145427, 89149, 91232, 100629, 97340, 86278, 87034, 147351, 123045, 91885,
     85973, 64130, 113244, 58968, 76296, 127931, 98145, 120731, 98289, 110340, 118285, 60112, 57177,
     58791, 59012, 66950, 139387, 145378, 86204, 147082, 84956, 134161, 148664, 74278, 96746,
@@ -78,7 +78,7 @@ fn rec_calculate_fuel(v: u64) -> f64 {
 }
 
 fn part2(vec: &[u64]) -> f64 {
-    return vec.iter().map(|v| rec_calculate_fuel(*v)).sum();
+    vec.iter().map(|v| rec_calculate_fuel(*v)).sum()
 }
 
 #[cfg(test)]
