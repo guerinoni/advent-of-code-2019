@@ -81,14 +81,6 @@ impl Line {
         let min = std::cmp::min(self.to.x, self.from.x);
         return (max - min).abs() as u64;
     }
-
-    fn instersection_on_x(&self, p: &Point) -> bool {
-        p.x <= self.to.x && p.x >= self.from.x
-    }
-
-    fn instersection_on_y(&self, p: &Point) -> bool {
-        p.y <= self.to.y && p.y >= self.from.y
-    }
 }
 
 fn get_points(vector: &Vec<&str>) -> Vec<Point> {
@@ -136,7 +128,7 @@ fn make_lines(points: &Vec<Point>) -> Vec<Line> {
     lines
 }
 
-fn get_instersection(v: &Line, vv: &Line) -> Option<Point> {
+fn get_intersection(v: &Line, vv: &Line) -> Option<Point> {
     let p0_x = v.from.x as f64;
     let p0_y = v.from.y as f64;
 
@@ -171,7 +163,7 @@ fn find_min_intersection_distance(v1: &Vec<Line>, v2: &Vec<Line>) -> u64 {
     let mut intersections = vec![];
     for v in v1 {
         for vv in v2 {
-            if let Some(point) = get_instersection(v, vv) {
+            if let Some(point) = get_intersection(v, vv) {
                 intersections.push(point);
             }
         }
@@ -251,7 +243,7 @@ fn find_min_steps(w1: &Vec<Line>, w2: &Vec<Line>) -> u64 {
         for vv in w2 {
             steps2 += vv.length();
 
-            if let Some(point) = get_instersection(v, vv) {
+            if let Some(point) = get_intersection(v, vv) {
                 if point == origin {
                     continue;
                 }
