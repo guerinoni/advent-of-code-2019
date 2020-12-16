@@ -1,3 +1,5 @@
+use crate::solver::*;
+
 /*
  * On the way to your gravity assist around the Moon, your ship computer beeps angrily about a "1202 program alarm".
  * On the radio, an Elf is already explaining how to handle the situation: "Don't worry, that's perfectly norma--" The ship computer bursts into flames.
@@ -60,6 +62,27 @@
  * replace position 1 with the value 12 and replace position 2 with the value 2. What value is left at position 0 after the program halts?
  */
 
+pub struct Day2 {
+    filename: &'static str,
+}
+
+impl Solver for Day2 {
+    fn new(input_file: &'static str) -> Day2 {
+        Day2 {
+            filename: input_file,
+        }
+    }
+
+    fn solve(&self) -> String {
+        let mut data = file_with_comma_to_vec(self.filename);
+        let p2 = self.part2(&data, 19690720).unwrap();
+        data[1] = 12 as i64;
+        data[2] = 2 as i64;
+        let p1 = self.part1(&data).unwrap();
+        format!("Solution part1 -> {}\n\tSolution part2 -> {}", p1, p2)
+    }
+}
+
 #[derive(PartialEq)]
 enum Op {
     Sum = 1,
@@ -68,7 +91,7 @@ enum Op {
 }
 
 impl Op {
-    fn from(value: usize) -> Op {
+    fn from(value: i64) -> Op {
         match value {
             1 => Self::Sum,
             2 => Self::Mul,
@@ -77,7 +100,7 @@ impl Op {
         }
     }
 
-    fn do_it(&self, num1: usize, num2: usize) -> usize {
+    fn do_it(&self, num1: i64, num2: i64) -> i64 {
         match &self {
             Self::Sum => num1 + num2,
             Self::Mul => num1 * num2,
@@ -86,7 +109,7 @@ impl Op {
     }
 }
 
-fn process(commands: &[usize]) -> Option<Vec<usize>> {
+fn process(commands: &[i64]) -> Option<Vec<i64>> {
     let mut cmds = commands.to_vec();
     let times = commands.len() / 4;
     for t in 0..times {
@@ -95,10 +118,10 @@ fn process(commands: &[usize]) -> Option<Vec<usize>> {
         if op == Op::Halt {
             return Some(cmds);
         }
-        let idx_num1: usize = cmds[i + 1];
-        let idx_num2: usize = cmds[i + 2];
-        let num1 = cmds.get(idx_num1)?;
-        let num2 = cmds.get(idx_num2)?;
+        let idx_num1 = cmds[i + 1];
+        let idx_num2 = cmds[i + 2];
+        let num1 = cmds.get(idx_num1 as usize)?;
+        let num2 = cmds.get(idx_num2 as usize)?;
         let idx_to_change = cmds[i + 3];
         let value = op.do_it(*num1, *num2);
         cmds[idx_to_change as usize] = value;
@@ -107,9 +130,11 @@ fn process(commands: &[usize]) -> Option<Vec<usize>> {
     Some(cmds)
 }
 
-fn part1(commands: &[usize]) -> Option<usize> {
-    let final_commands = process(commands)?;
-    Some(final_commands[0])
+impl Day2 {
+    fn part1(&self, commands: &[i64]) -> Option<i64> {
+        let final_commands = process(commands)?;
+        Some(final_commands[0])
+    }
 }
 
 /*
@@ -148,72 +173,38 @@ fn part1(commands: &[usize]) -> Option<usize> {
  * What is 100 * noun + verb? (For example, if noun=12 and verb=2, the answer would be 1202.)
  */
 
-fn part2(commands: &[usize], num_to_search: usize) -> Option<usize> {
-    let mut cmds = commands.to_vec();
-    for noun in 0..999 {
-        for verb in 0..999 {
-            cmds[1] = noun;
-            cmds[2] = verb;
-            let result = part1(&cmds);
-            if let Some(res) = result {
-                if res == num_to_search {
-                    return Some(100 * noun + verb);
+impl Day2 {
+    fn part2(&self, commands: &[i64], num_to_search: i64) -> Option<i64> {
+        let mut cmds = commands.to_vec();
+        for noun in 0..999 {
+            for verb in 0..999 {
+                cmds[1] = noun;
+                cmds[2] = verb;
+                let result = self.part1(&cmds);
+                if let Some(res) = result {
+                    if res == num_to_search {
+                        return Some(100 * noun + verb);
+                    }
                 }
             }
         }
+
+        None
     }
-
-    None
 }
-
 #[cfg(test)]
 mod tests {
+
     use super::*;
 
     #[test]
-    fn day2_simple() {
-        assert_eq!(process(&[1, 0, 0, 0, 99]).unwrap(), [2, 0, 0, 0, 99]);
-        assert_eq!(process(&[2, 3, 0, 3, 99]).unwrap(), [2, 3, 0, 6, 99]);
-        assert_eq!(
-            process(&[2, 4, 4, 5, 99, 0]).unwrap(),
-            [2, 4, 4, 5, 99, 9801]
-        );
-    }
-
-    #[test]
-    fn day2_medium() {
-        assert_eq!(
-            process(&[1, 1, 1, 4, 99, 5, 6, 0, 99]).unwrap(),
-            [30, 1, 1, 4, 2, 5, 6, 0, 99]
-        );
-    }
-
-    #[test]
-    fn day2_early_halt() {
-        assert_eq!(
-            process(&[1, 1, 1, 2, 99, 5, 6, 0, 99]).unwrap(),
-            [1, 1, 2, 2, 99, 5, 6, 0, 99]
-        );
-    }
-
-    #[test]
-    fn day2_all() {
-        let mut official = vec![
-            1, 0, 0, 3, 1, 1, 2, 3, 1, 3, 4, 3, 1, 5, 0, 3, 2, 10, 1, 19, 1, 5, 19, 23, 1, 23, 5,
-            27, 2, 27, 10, 31, 1, 5, 31, 35, 2, 35, 6, 39, 1, 6, 39, 43, 2, 13, 43, 47, 2, 9, 47,
-            51, 1, 6, 51, 55, 1, 55, 9, 59, 2, 6, 59, 63, 1, 5, 63, 67, 2, 67, 13, 71, 1, 9, 71,
-            75, 1, 75, 9, 79, 2, 79, 10, 83, 1, 6, 83, 87, 1, 5, 87, 91, 1, 6, 91, 95, 1, 95, 13,
-            99, 1, 10, 99, 103, 2, 6, 103, 107, 1, 107, 5, 111, 1, 111, 13, 115, 1, 115, 13, 119,
-            1, 13, 119, 123, 2, 123, 13, 127, 1, 127, 6, 131, 1, 131, 9, 135, 1, 5, 135, 139, 2,
-            139, 6, 143, 2, 6, 143, 147, 1, 5, 147, 151, 1, 151, 2, 155, 1, 9, 155, 0, 99, 2, 14,
-            0, 0,
-        ];
-
-        assert_eq!(part2(&official, 19690720), Some(2552));
-
-        official[1] = 12;
-        official[2] = 2;
-
-        assert_eq!(part1(&official).unwrap(), 9706670);
+    fn validation() {
+        let d = Day2::new("");
+        assert_eq!(d.part1(&[1, 0, 0, 0, 99]).unwrap(), 2);
+        assert_eq!(d.part1(&[2, 3, 0, 3, 99]).unwrap(), 2);
+        assert_eq!(d.part1(&[2, 4, 4, 5, 99, 0]).unwrap(), 2);
+        assert_eq!(d.part1(&[1, 1, 1, 4, 99, 5, 6, 0, 99]).unwrap(), 30);
+        assert_eq!(d.part1(&[1, 1, 1, 2, 99, 5, 6, 0, 99]).unwrap(), 1);
+        assert_eq!(d.part2(&[1, 1, 1, 2, 99, 5, 6, 0, 99], 1).unwrap(), 0);
     }
 }

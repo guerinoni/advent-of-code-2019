@@ -1,7 +1,10 @@
+use crate::solver::*;
+
 /*
  * --- Day 1: The Tyranny of the Rocket Equation ---
  * Santa has become stranded at the edge of the Solar System while delivering presents to other planets!
- * To accurately calculate his position in space, safely align his warp drive, and return to Earth in time to save Christmas, he needs you to bring him measurements from fifty stars.
+ * To accurately calculate his position in space, safely align his warp drive, and return to Earth in time to save Christmas,
+ * he needs you to bring him measurements from fifty stars.
  *
  * Collect stars by solving puzzles. Two puzzles will be made available on each day in the Advent calendar;
  * the second puzzle is unlocked when you complete the first. Each puzzle grants one star. Good luck!
@@ -25,26 +28,36 @@
  * What is the sum of the fuel requirements for all of the modules on your spacecraft?
  */
 
-static INPUT: & [u64] = &[
-    94735, 80130, 127915, 145427, 89149, 91232, 100629, 97340, 86278, 87034, 147351, 123045, 91885,
-    85973, 64130, 113244, 58968, 76296, 127931, 98145, 120731, 98289, 110340, 118285, 60112, 57177,
-    58791, 59012, 66950, 139387, 145378, 86204, 147082, 84956, 134161, 148664, 74278, 96746,
-    144525, 81214, 70966, 107050, 134179, 138587, 80236, 139871, 104439, 64643, 145453, 94791,
-    51690, 94189, 148476, 79956, 81760, 149796, 109544, 57533, 142999, 126419, 115434, 57092,
-    64244, 109663, 94701, 109265, 145851, 95183, 84433, 53818, 106234, 127380, 149774, 59601,
-    138851, 54488, 100877, 136952, 61538, 67705, 60299, 130769, 113176, 106723, 133280, 111065,
-    63688, 139307, 122703, 60162, 89567, 63994, 66608, 126376, 136052, 112255, 98525, 134023,
-    141479, 98200,
-];
-
-fn part1(vec: &[u64]) -> f64 {
-    vec.iter().map(|v| calculate_fuel(*v)).sum()
+pub struct Day1 {
+    filename: &'static str,
 }
 
-fn calculate_fuel(v: u64) -> f64 {
+impl Solver for Day1 {
+    fn new(input_file: &'static str) -> Day1 {
+        Day1 {
+            filename: input_file,
+        }
+    }
+
+    fn solve(&self) -> String {
+        let data = file_to_vec(self.filename).unwrap();
+        format!(
+            "Solution part1 -> {}\n\tSolution part2 -> {}",
+            self.part1(&data),
+            self.part2(&data)
+        )
+    }
+}
+
+impl Day1 {
+    fn part1(&self, vec: &[i64]) -> f64 {
+        vec.iter().map(|v| calculate_fuel(*v)).sum()
+    }
+}
+
+fn calculate_fuel(v: i64) -> f64 {
     (v as f64 / 3.0).floor() - 2.0
 }
-
 /*
  * --- Part Two ---
  * During the second Go / No Go poll, the Elf in charge of the Rocket Equation Double-Checker stops the launch sequence.
@@ -68,17 +81,19 @@ fn calculate_fuel(v: u64) -> f64 {
  * the mass of the added fuel? (Calculate the fuel requirements for each module separately, then add them all up at the end.)
  */
 
-fn rec_calculate_fuel(v: u64) -> f64 {
+fn rec_calculate_fuel(v: i64) -> f64 {
     let remain = calculate_fuel(v);
     if remain <= 0.0 {
         return 0 as f64;
     }
 
-    remain + rec_calculate_fuel(remain as u64)
+    remain + rec_calculate_fuel(remain as i64)
 }
 
-fn part2(vec: &[u64]) -> f64 {
-    vec.iter().map(|v| rec_calculate_fuel(*v)).sum()
+impl Day1 {
+    fn part2(&self, vec: &[i64]) -> f64 {
+        vec.iter().map(|v| rec_calculate_fuel(*v)).sum()
+    }
 }
 
 #[cfg(test)]
@@ -86,16 +101,11 @@ mod tests {
     use super::*;
 
     #[test]
-    fn day1_part1() {
-        let simple_input: Vec<u64> = vec![1969];
-        assert_eq!(part1(&simple_input), 654.0);
-        assert_eq!(part1(INPUT), 3394106.0);
-    }
+    fn validation() {
+        let input: Vec<i64> = vec![1969];
+        let d = Day1::new("");
 
-    #[test]
-    fn day1_part2() {
-        let simple_input: Vec<u64> = vec![1969];
-        assert_eq!(part2(&simple_input), 966.0);
-        assert_eq!(part2(INPUT), 5088280.0);
+        assert_eq!(d.part1(&input), 654.0);
+        assert_eq!(d.part2(&input), 966.0);
     }
 }
