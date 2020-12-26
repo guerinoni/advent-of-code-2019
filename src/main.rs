@@ -1,6 +1,7 @@
 mod day1;
 mod day2;
 mod day3;
+mod day4;
 mod solver;
 
 use solver::*;
@@ -16,4 +17,7 @@ fn main() {
 
     let d = day3::Day3::new("input/day3");
     println!("Day3 -> {}", d.solve());
+
+    let d = day4::Day4::new("input/day4");
+    println!("Day4 -> {}", d.solve());
 }
