@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::solver::*;
 
 /*
@@ -39,7 +41,7 @@ impl Solver for Day4 {
         format!(
             "Solution part1 -> {}\n\tSolution part2 -> {}",
             self.part1(f[0], f[1]),
-            99
+            0
         )
     }
 }
@@ -47,5 +49,34 @@ impl Solver for Day4 {
 impl Day4 {
     fn part1(&self, from: i64, to: i64) -> i64 {
         from + to
+    }
+}
+
+fn has_digit_same(number: i64) -> bool {
+    let n = number.to_string();
+    let mut map = HashMap::new();
+    for c in n.chars() {        
+        if !map.contains_key(&c) {
+            map.insert(c, 1);
+            continue;
+        }
+
+        if let Some(x) = map.get_mut(&c) {
+            *x = *x+1;
+        }
+    }
+
+    let mut c = map.iter().filter(|v| *v.1 > 1);
+    c.next() != None
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn validation() {
+        assert_eq!(has_digit_same(122345), true);
+        assert_eq!(has_digit_same(123456), false);
     }
 }
