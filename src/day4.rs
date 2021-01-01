@@ -53,21 +53,35 @@ impl Day4 {
 }
 
 fn has_digit_same(number: i64) -> bool {
-    let n = number.to_string();
     let mut map = HashMap::new();
-    for c in n.chars() {        
+    for c in number.to_string().chars() {
         if !map.contains_key(&c) {
             map.insert(c, 1);
             continue;
         }
 
         if let Some(x) = map.get_mut(&c) {
-            *x = *x+1;
+            *x = *x + 1;
         }
     }
 
     let mut c = map.iter().filter(|v| *v.1 > 1);
     c.next() != None
+}
+
+fn digit_increase(number: i64) -> bool {
+    let mut last = 0;
+    for n in number.to_string().chars() {
+        if let Some(nn) = n.to_digit(10) {
+            if nn >= last {
+                last = nn;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    true
 }
 
 #[cfg(test)]
@@ -78,5 +92,9 @@ mod tests {
     fn validation() {
         assert_eq!(has_digit_same(122345), true);
         assert_eq!(has_digit_same(123456), false);
+
+        assert_eq!(digit_increase(123456), true);
+        assert_eq!(digit_increase(111111), true);
+        assert_eq!(digit_increase(654321), false);
     }
 }
