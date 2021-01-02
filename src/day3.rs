@@ -168,7 +168,7 @@ fn get_intersection(v: &Line, vv: &Line) -> Option<Point> {
     let s = (-s1_y * (p0_x - p2_x) + s1_x * (p0_y - p2_y)) / det;
     let t = (s2_x * (p0_y - p2_y) - s2_y * (p0_x - p2_x)) / det;
 
-    if s >= 0.0 && s <= 1.0 && t >= 0.0 && t <= 1.0 {
+    if (0.0..=1.0).contains(&s) && (0.0..=1.0).contains(&t) {
         let ix = (p0_x + (t * s1_x)) as i32;
         let iy = (p0_y + (t * s1_y)) as i32;
         return Some(Point { x: ix, y: iy });
