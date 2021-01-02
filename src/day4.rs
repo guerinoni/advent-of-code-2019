@@ -48,7 +48,14 @@ impl Solver for Day4 {
 
 impl Day4 {
     fn part1(&self, from: i64, to: i64) -> i64 {
-        from + to
+        let mut counter = 0;
+        for i in from..to {
+            if has_digit_same(i) && digit_increase(i) {
+                counter = counter + 1;
+            }
+        }
+
+        counter
     }
 }
 
@@ -96,5 +103,8 @@ mod tests {
         assert_eq!(digit_increase(123456), true);
         assert_eq!(digit_increase(111111), true);
         assert_eq!(digit_increase(654321), false);
+
+        let d = Day4::new("");
+        assert_eq!(d.part1(165432, 707912), 1716);
     }
 }
