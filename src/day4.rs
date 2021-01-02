@@ -47,15 +47,11 @@ impl Solver for Day4 {
 }
 
 impl Day4 {
-    fn part1(&self, from: i64, to: i64) -> i64 {
-        let mut counter = 0;
-        for i in from..to {
-            if has_digit_same(i) && digit_increase(i) {
-                counter = counter + 1;
-            }
-        }
-
-        counter
+    fn part1(&self, from: i64, to: i64) -> usize {
+        (from..to)
+            .into_iter()
+            .filter(|&n| digit_increase(n) && has_digit_same(n))
+            .count()
     }
 }
 
@@ -105,29 +101,25 @@ fn digit_increase(number: i64) -> bool {
  */
 
 impl Day4 {
-    fn part2(&self, from: i64, to: i64) -> i64 {
-        let mut counter = 0;
-        for i in from..to {
-            if has_adjacent_same_digit(i) && digit_increase(i) {
-                counter = counter + 1;
-            }
-        }
-
-        counter
+    fn part2(&self, from: i64, to: i64) -> usize {
+        (from..to)
+            .into_iter()
+            .filter(|&n| digit_increase(n) && has_adjacent_same_digit(n))
+            .count()
     }
 }
 
 fn has_adjacent_same_digit(number: i64) -> bool {
-	let x: Vec<_> = format!("{}", number).chars().collect();
-	let mut same = HashMap::<char, usize>::new();
-	for w in x.windows(2) {
-		let a = w[0];
-		let b = w[1];
-		if a == b {
-			*same.entry(a).or_default() += 1;
-		}
-	}
-	same.iter().filter(|x| *x.1 == 1).count() > 0
+    let x: Vec<_> = format!("{}", number).chars().collect();
+    let mut same = HashMap::<char, usize>::new();
+    for w in x.windows(2) {
+        let a = w[0];
+        let b = w[1];
+        if a == b {
+            *same.entry(a).or_default() += 1;
+        }
+    }
+    same.iter().filter(|x| *x.1 == 1).count() > 0
 }
 
 #[cfg(test)]
