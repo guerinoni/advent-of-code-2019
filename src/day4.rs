@@ -58,14 +58,7 @@ impl Day4 {
 fn has_digit_same(number: i64) -> bool {
     let mut map = HashMap::new();
     for c in number.to_string().chars() {
-        if !map.contains_key(&c) {
-            map.insert(c, 1);
-            continue;
-        }
-
-        if let Some(x) = map.get_mut(&c) {
-            *x = *x + 1;
-        }
+        *map.entry(c).or_insert(0) += 1;
     }
 
     let mut c = map.iter().filter(|v| *v.1 > 1);

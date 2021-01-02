@@ -76,8 +76,8 @@ impl Solver for Day2 {
     fn solve(&self) -> String {
         let mut data = file_with_comma_to_vec(self.filename);
         let p2 = self.part2(&data, 19690720).unwrap();
-        data[1] = 12 as i64;
-        data[2] = 2 as i64;
+        data[1] = 12_i64;
+        data[2] = 2_i64;
         let p1 = self.part1(&data).unwrap();
         format!("Solution part1 -> {}\n\tSolution part2 -> {}", p1, p2)
     }
