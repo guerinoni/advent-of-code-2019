@@ -1,3 +1,5 @@
+use std::process::Output;
+
 use crate::solver::*;
 
 /*
@@ -87,6 +89,8 @@ impl Solver for Day2 {
 enum Op {
     Sum = 1,
     Mul,
+    Input,
+    Output,
     Halt,
 }
 
@@ -95,6 +99,8 @@ impl Op {
         match value {
             1 => Self::Sum,
             2 => Self::Mul,
+            3 => Self::Input,
+            4 => Self::Output,
             99 => Self::Halt,
             _ => panic!("unknown value {}", value),
         }
@@ -131,7 +137,7 @@ fn process(commands: &[i64]) -> Option<Vec<i64>> {
 }
 
 impl Day2 {
-    fn part1(&self, commands: &[i64]) -> Option<i64> {
+    pub fn part1(&self, commands: &[i64]) -> Option<i64> {
         let final_commands = process(commands)?;
         Some(final_commands[0])
     }
