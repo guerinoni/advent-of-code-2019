@@ -1,5 +1,3 @@
-use std::process::Output;
-
 use crate::solver::*;
 
 /*
@@ -85,8 +83,8 @@ impl Solver for Day2 {
     }
 }
 
-#[derive(PartialEq)]
-enum Op {
+#[derive(Debug, Eq, PartialEq)]
+pub enum OpCode {
     Sum = 1,
     Mul,
     Input,
@@ -94,8 +92,8 @@ enum Op {
     Halt,
 }
 
-impl Op {
-    fn from(value: i64) -> Op {
+impl From<i64> for OpCode {
+    fn from(value: i64) -> OpCode {
         match value {
             1 => Self::Sum,
             2 => Self::Mul,
@@ -105,7 +103,9 @@ impl Op {
             _ => panic!("unknown value {}", value),
         }
     }
+}
 
+impl OpCode {
     fn do_it(&self, num1: i64, num2: i64) -> i64 {
         match &self {
             Self::Sum => num1 + num2,
@@ -120,8 +120,8 @@ fn process(commands: &[i64]) -> Option<Vec<i64>> {
     let times = commands.len() / 4;
     for t in 0..times {
         let i = 4 * t;
-        let op = Op::from(cmds[i]);
-        if op == Op::Halt {
+        let op = OpCode::from(cmds[i]);
+        if op == OpCode::Halt {
             return Some(cmds);
         }
         let idx_num1 = cmds[i + 1];
