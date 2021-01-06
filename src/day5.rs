@@ -1,4 +1,4 @@
-use crate::{day2, solver::*};
+use crate::solver::*;
 
 /*
  * --- Day 5: Sunny with a Chance of Asteroids ---
@@ -94,58 +94,5 @@ impl Solver for Day5 {
 
     fn solve(&self) -> String {
         format!("Solution part1 -> {}\n\tSolution part2 -> {}", 10, 10)
-    }
-}
-
-#[derive(Debug, Eq, PartialEq)]
-enum ParameterMode {
-    Position,
-    Immediate,
-    Relative,
-}
-
-impl From<i64> for ParameterMode {
-    fn from(n: i64) -> Self {
-        match n {
-            0 => ParameterMode::Position,
-            1 => ParameterMode::Immediate,
-            2 => ParameterMode::Relative,
-            _ => panic!("invalid parameter mode"),
-        }
-    }
-}
-
-fn decode_instruction(instruction: i64) -> (day2::OpCode, Vec<ParameterMode>) {
-    let opcode = instruction % 100;
-    let param_modes = vec![
-        ((instruction / 100) % 10).into(),
-        ((instruction / 1000) % 10).into(),
-        ((instruction / 10000) % 10).into(),
-    ];
-
-    (opcode.into(), param_modes)
-}
-
-#[cfg(test)]
-mod tests {
-    use day2::OpCode;
-
-    use crate::day2;
-
-    use super::*;
-
-    #[test]
-    fn validation() {
-        assert_eq!(
-            decode_instruction(1002),
-            (
-                OpCode::Mul,
-                vec![
-                    ParameterMode::Position,
-                    ParameterMode::Immediate,
-                    ParameterMode::Position,
-                ]
-            )
-        );
     }
 }

@@ -105,32 +105,68 @@ impl From<i64> for OpCode {
     }
 }
 
-impl OpCode {
-    fn do_it(&self, num1: i64, num2: i64) -> i64 {
-        match &self {
-            Self::Sum => num1 + num2,
-            Self::Mul => num1 * num2,
-            _ => panic!("program should halt"),
+fn sum(cmds: &mut [i64], pos: &mut usize, params: Vec<ParameterMode>) {
+    let num1 = cmds[cmds[*pos + 1] as usize];
+    let num2 = cmds[cmds[*pos + 2] as usize];
+    let index_of_result = cmds[*pos + 3] as usize;
+    cmds[index_of_result] = num1 + num2;
+    *pos += 4;
+}
+
+fn mul(cmds: &mut [i64], pos: &mut usize, params: Vec<ParameterMode>) {
+    let num1 = cmds[cmds[*pos + 1] as usize];
+    let num2 = cmds[cmds[*pos + 2] as usize];
+    let index_of_result = cmds[*pos + 3] as usize;
+    cmds[index_of_result] = num1 * num2;
+    *pos += 4;
+}
+
+#[derive(Debug, Eq, PartialEq)]
+enum ParameterMode {
+    Position,
+    Immediate,
+    Relative,
+}
+
+impl From<i64> for ParameterMode {
+    fn from(n: i64) -> Self {
+        match n {
+            0 => ParameterMode::Position,
+            1 => ParameterMode::Immediate,
+            2 => ParameterMode::Relative,
+            _ => panic!("invalid parameter mode"),
         }
     }
 }
 
+fn decode_instruction(instruction: i64) -> (OpCode, Vec<ParameterMode>) {
+    let opcode = instruction % 100;
+    let param_modes = vec![
+        ((instruction / 100) % 10).into(),
+        ((instruction / 1000) % 10).into(),
+        ((instruction / 10000) % 10).into(),
+    ];
+
+    (opcode.into(), param_modes)
+}
+
 fn process(commands: &[i64]) -> Option<Vec<i64>> {
     let mut cmds = commands.to_vec();
-    let times = commands.len() / 4;
-    for t in 0..times {
-        let i = 4 * t;
-        let op = OpCode::from(cmds[i]);
-        if op == OpCode::Halt {
-            return Some(cmds);
+    let mut pos = 0;
+
+    loop {
+        let instructions = cmds[pos];
+        let (op_code, params) = decode_instruction(instructions);
+        match OpCode::from(op_code) {
+            OpCode::Sum => sum(&mut cmds, &mut pos, params),
+            OpCode::Mul => mul(&mut cmds, &mut pos, params),
+            OpCode::Halt => break,
+            _ => panic!("invalid OpCode"),
         }
-        let idx_num1 = cmds[i + 1];
-        let idx_num2 = cmds[i + 2];
-        let num1 = cmds.get(idx_num1 as usize)?;
-        let num2 = cmds.get(idx_num2 as usize)?;
-        let idx_to_change = cmds[i + 3];
-        let value = op.do_it(*num1, *num2);
-        cmds[idx_to_change as usize] = value;
+
+        if pos >= commands.len() {
+            break;
+        }
     }
 
     Some(cmds)
@@ -212,5 +248,29 @@ mod tests {
         assert_eq!(d.part1(&[1, 1, 1, 4, 99, 5, 6, 0, 99]).unwrap(), 30);
         assert_eq!(d.part1(&[1, 1, 1, 2, 99, 5, 6, 0, 99]).unwrap(), 1);
         assert_eq!(d.part2(&[1, 1, 1, 2, 99, 5, 6, 0, 99], 1).unwrap(), 0);
+
+        assert_eq!(
+            decode_instruction(1002),
+            (
+                OpCode::Mul,
+                vec![
+                    ParameterMode::Position,
+                    ParameterMode::Immediate,
+                    ParameterMode::Position,
+                ]
+            )
+        );
+
+        assert_eq!(
+            decode_instruction(1),
+            (
+                OpCode::Sum,
+                vec![
+                    ParameterMode::Position,
+                    ParameterMode::Position,
+                    ParameterMode::Position,
+                ]
+            )
+        );
     }
 }
