@@ -1,4 +1,4 @@
-use crate::solver::*;
+use crate::{day5, solver::*};
 
 /*
  * On the way to your gravity assist around the Moon, your ship computer beeps angrily about a "1202 program alarm".
@@ -118,7 +118,7 @@ fn decode_parameter(
     }
 }
 
-fn decode_destination(
+pub fn decode_destination(
     cmds: &mut [i64],
     pos: &usize,
     idx_param: usize,
@@ -151,7 +151,7 @@ fn mul(cmds: &mut [i64], pos: &mut usize, params: &Vec<ParameterMode>) {
 }
 
 #[derive(Debug, Eq, PartialEq)]
-enum ParameterMode {
+pub enum ParameterMode {
     Position,
     Immediate,
 }
@@ -177,7 +177,7 @@ fn decode_instruction(instruction: i64) -> (OpCode, Vec<ParameterMode>) {
     (opcode.into(), param_modes)
 }
 
-fn process(commands: &[i64]) -> Option<Vec<i64>> {
+pub fn process(commands: &[i64], input: i64) -> Option<Vec<i64>> {
     let mut cmds = commands.to_vec();
     let mut pos = 0;
 
@@ -187,6 +187,7 @@ fn process(commands: &[i64]) -> Option<Vec<i64>> {
         match OpCode::from(op_code) {
             OpCode::Sum => sum(&mut cmds, &mut pos, &params),
             OpCode::Mul => mul(&mut cmds, &mut pos, &params),
+            OpCode::Input => day5::input(&mut cmds, &mut pos, &params, input),
             OpCode::Halt => break,
             _ => panic!("invalid OpCode"),
         }
@@ -201,7 +202,7 @@ fn process(commands: &[i64]) -> Option<Vec<i64>> {
 
 impl Day2 {
     pub fn part1(&self, commands: &[i64]) -> Option<i64> {
-        let final_commands = process(commands)?;
+        let final_commands = process(commands, 0)?;
         Some(final_commands[0])
     }
 }
