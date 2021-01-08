@@ -105,19 +105,48 @@ impl From<i64> for OpCode {
     }
 }
 
-fn sum(cmds: &mut [i64], pos: &mut usize, params: Vec<ParameterMode>) {
-    let num1 = cmds[cmds[*pos + 1] as usize];
-    let num2 = cmds[cmds[*pos + 2] as usize];
-    let index_of_result = cmds[*pos + 3] as usize;
-    cmds[index_of_result] = num1 + num2;
+fn decode_parameter(
+    cmds: &mut [i64],
+    pos: &usize,
+    idx_param: usize,
+    params: &Vec<ParameterMode>,
+) -> i64 {
+    let p = cmds[pos + idx_param];
+    match params[idx_param - 1] {
+        ParameterMode::Position => cmds[p as usize],
+        ParameterMode::Immediate => p,
+    }
+}
+
+fn decode_destination(
+    cmds: &mut [i64],
+    pos: &usize,
+    idx_param: usize,
+    params: &Vec<ParameterMode>,
+) -> i64 {
+    let d = cmds[pos + idx_param];
+    match params[idx_param - 1] {
+        ParameterMode::Position => d,
+        ParameterMode::Immediate => panic!("invalid mode for dest"),
+    }
+}
+
+fn get_args_3(cmds: &mut [i64], pos: &usize, params: &Vec<ParameterMode>) -> (i64, i64, i64) {
+    let num1 = decode_parameter(cmds, pos, 1, params);
+    let num2 = decode_parameter(cmds, pos, 2, params);
+    let dest = decode_destination(cmds, pos, 3, params);
+    (num1, num2, dest)
+}
+
+fn sum(cmds: &mut [i64], pos: &mut usize, params: &Vec<ParameterMode>) {
+    let (n1, n2, d) = get_args_3(cmds, pos, params);
+    cmds[d as usize] = n1 + n2;
     *pos += 4;
 }
 
-fn mul(cmds: &mut [i64], pos: &mut usize, params: Vec<ParameterMode>) {
-    let num1 = cmds[cmds[*pos + 1] as usize];
-    let num2 = cmds[cmds[*pos + 2] as usize];
-    let index_of_result = cmds[*pos + 3] as usize;
-    cmds[index_of_result] = num1 * num2;
+fn mul(cmds: &mut [i64], pos: &mut usize, params: &Vec<ParameterMode>) {
+    let (n1, n2, d) = get_args_3(cmds, pos, params);
+    cmds[d as usize] = n1 * n2;
     *pos += 4;
 }
 
@@ -125,7 +154,6 @@ fn mul(cmds: &mut [i64], pos: &mut usize, params: Vec<ParameterMode>) {
 enum ParameterMode {
     Position,
     Immediate,
-    Relative,
 }
 
 impl From<i64> for ParameterMode {
@@ -133,7 +161,6 @@ impl From<i64> for ParameterMode {
         match n {
             0 => ParameterMode::Position,
             1 => ParameterMode::Immediate,
-            2 => ParameterMode::Relative,
             _ => panic!("invalid parameter mode"),
         }
     }
@@ -158,8 +185,8 @@ fn process(commands: &[i64]) -> Option<Vec<i64>> {
         let instructions = cmds[pos];
         let (op_code, params) = decode_instruction(instructions);
         match OpCode::from(op_code) {
-            OpCode::Sum => sum(&mut cmds, &mut pos, params),
-            OpCode::Mul => mul(&mut cmds, &mut pos, params),
+            OpCode::Sum => sum(&mut cmds, &mut pos, &params),
+            OpCode::Mul => mul(&mut cmds, &mut pos, &params),
             OpCode::Halt => break,
             _ => panic!("invalid OpCode"),
         }
