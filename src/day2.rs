@@ -75,10 +75,10 @@ impl Solver for Day2 {
 
     fn solve(&self) -> String {
         let mut data = file_with_comma_to_vec(self.filename);
-        let p2 = self.part2(&data, 19690720).unwrap();
+        let p2 = self.part2(&data, 19690720);
         data[1] = 12_i64;
         data[2] = 2_i64;
-        let p1 = self.part1(&data).unwrap();
+        let p1 = self.part1(&data);
         format!("Solution part1 -> {}\n\tSolution part2 -> {}", p1, p2)
     }
 }
@@ -105,7 +105,7 @@ impl From<i64> for OpCode {
     }
 }
 
-fn decode_parameter(
+pub fn decode_parameter(
     cmds: &mut [i64],
     pos: &usize,
     idx_param: usize,
@@ -177,9 +177,10 @@ fn decode_instruction(instruction: i64) -> (OpCode, Vec<ParameterMode>) {
     (opcode.into(), param_modes)
 }
 
-pub fn process(commands: &[i64], input: i64) -> Option<Vec<i64>> {
+pub fn process(commands: &[i64], input: i64) -> Vec<i64> {
     let mut cmds = commands.to_vec();
     let mut pos = 0;
+    let mut value = input;
 
     loop {
         let instructions = cmds[pos];
@@ -187,9 +188,9 @@ pub fn process(commands: &[i64], input: i64) -> Option<Vec<i64>> {
         match OpCode::from(op_code) {
             OpCode::Sum => sum(&mut cmds, &mut pos, &params),
             OpCode::Mul => mul(&mut cmds, &mut pos, &params),
-            OpCode::Input => day5::input(&mut cmds, &mut pos, &params, input),
+            OpCode::Input => day5::input(&mut cmds, &mut pos, &params, value),
+            OpCode::Output => day5::output(&mut cmds, &mut pos, &params, &mut value),
             OpCode::Halt => break,
-            _ => panic!("invalid OpCode"),
         }
 
         if pos >= commands.len() {
@@ -197,13 +198,13 @@ pub fn process(commands: &[i64], input: i64) -> Option<Vec<i64>> {
         }
     }
 
-    Some(cmds)
+    cmds
 }
 
 impl Day2 {
-    pub fn part1(&self, commands: &[i64]) -> Option<i64> {
-        let final_commands = process(commands, 0)?;
-        Some(final_commands[0])
+    pub fn part1(&self, commands: &[i64]) -> i64 {
+        let final_commands = process(commands, 0);
+        final_commands[0]
     }
 }
 
@@ -244,22 +245,19 @@ impl Day2 {
  */
 
 impl Day2 {
-    fn part2(&self, commands: &[i64], num_to_search: i64) -> Option<i64> {
+    fn part2(&self, commands: &[i64], num_to_search: i64) -> i64 {
         let mut cmds = commands.to_vec();
-        for noun in 0..999 {
-            for verb in 0..999 {
+        for noun in 0..99 {
+            for verb in 0..99 {
                 cmds[1] = noun;
                 cmds[2] = verb;
                 let result = self.part1(&cmds);
-                if let Some(res) = result {
-                    if res == num_to_search {
-                        return Some(100 * noun + verb);
-                    }
+                if result == num_to_search {
+                    return 100 * noun + verb;
                 }
             }
         }
-
-        None
+        0
     }
 }
 #[cfg(test)]
@@ -270,12 +268,12 @@ mod tests {
     #[test]
     fn validation() {
         let d = Day2::new("");
-        assert_eq!(d.part1(&[1, 0, 0, 0, 99]).unwrap(), 2);
-        assert_eq!(d.part1(&[2, 3, 0, 3, 99]).unwrap(), 2);
-        assert_eq!(d.part1(&[2, 4, 4, 5, 99, 0]).unwrap(), 2);
-        assert_eq!(d.part1(&[1, 1, 1, 4, 99, 5, 6, 0, 99]).unwrap(), 30);
-        assert_eq!(d.part1(&[1, 1, 1, 2, 99, 5, 6, 0, 99]).unwrap(), 1);
-        assert_eq!(d.part2(&[1, 1, 1, 2, 99, 5, 6, 0, 99], 1).unwrap(), 0);
+        assert_eq!(d.part1(&[1, 0, 0, 0, 99]), 2);
+        assert_eq!(d.part1(&[2, 3, 0, 3, 99]), 2);
+        assert_eq!(d.part1(&[2, 4, 4, 5, 99, 0]), 2);
+        assert_eq!(d.part1(&[1, 1, 1, 4, 99, 5, 6, 0, 99]), 30);
+        assert_eq!(d.part1(&[1, 1, 1, 2, 99, 5, 6, 0, 99]), 1);
+        assert_eq!(d.part2(&[1, 1, 1, 2, 99, 5, 6, 0, 99], 1), 0);
 
         assert_eq!(
             decode_instruction(1002),
