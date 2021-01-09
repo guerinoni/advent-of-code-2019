@@ -93,23 +93,36 @@ impl Solver for Day5 {
     }
 
     fn solve(&self) -> String {
+        let data = file_with_comma_to_vec(self.filename);
+
         format!(
             "Solution part1 -> {}\n\tSolution part2 -> {}",
-            self.part1(),
+            self.part1(&data),
             10
         )
     }
 }
 
 impl Day5 {
-    fn part1(&self) -> i64 {
-        day2::process(&[1, 0, 0, 0, 99], 1);
-        0
+    fn part1(&self, data: &Vec<i64>) -> i64 {
+        let d = day2::process(data, 1);
+        d[0]
     }
 }
 
 pub fn input(cmds: &mut [i64], pos: &mut usize, params: &Vec<day2::ParameterMode>, input: i64) {
     let d = day2::decode_destination(cmds, pos, 0, params);
     cmds[d as usize] = input;
+    *pos += 2;
+}
+
+pub fn output(
+    cmds: &mut [i64],
+    pos: &mut usize,
+    params: &Vec<day2::ParameterMode>,
+    input: &mut i64,
+) {
+    let n = day2::decode_parameter(cmds, pos, 1, params);
+    *input = n;
     *pos += 2;
 }
