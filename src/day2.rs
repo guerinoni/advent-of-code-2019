@@ -177,7 +177,7 @@ fn decode_instruction(instruction: i64) -> (OpCode, Vec<ParameterMode>) {
     (opcode.into(), param_modes)
 }
 
-pub fn process(commands: &[i64], input: i64) -> Vec<i64> {
+pub fn process(commands: &[i64], input: i64) -> (Vec<i64>, i64) {
     let mut cmds = commands.to_vec();
     let mut pos = 0;
     let mut value = input;
@@ -198,13 +198,13 @@ pub fn process(commands: &[i64], input: i64) -> Vec<i64> {
         }
     }
 
-    cmds
+    (cmds, value)
 }
 
 impl Day2 {
     pub fn part1(&self, commands: &[i64]) -> i64 {
         let final_commands = process(commands, 0);
-        final_commands[0]
+        final_commands.0[0]
     }
 }
 
