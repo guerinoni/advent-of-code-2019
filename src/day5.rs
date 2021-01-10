@@ -106,12 +106,12 @@ impl Solver for Day5 {
 impl Day5 {
     fn part1(&self, data: &Vec<i64>) -> i64 {
         let d = day2::process(data, 1);
-        d[0]
+        d.1
     }
 }
 
 pub fn input(cmds: &mut [i64], pos: &mut usize, params: &Vec<day2::ParameterMode>, input: i64) {
-    let d = day2::decode_destination(cmds, pos, 0, params);
+    let d = day2::decode_destination(cmds, pos, 1, params);
     cmds[d as usize] = input;
     *pos += 2;
 }
@@ -125,4 +125,22 @@ pub fn output(
     let n = day2::decode_parameter(cmds, pos, 1, params);
     *input = n;
     *pos += 2;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn validate() {
+        assert_eq!(
+            day2::process(&[3, 0, 4, 0, 99], 1),
+            (vec![1, 0, 4, 0, 99], 1)
+        );
+
+        let d = Day5::new("input/day5");
+        let data = file_with_comma_to_vec(d.filename);
+        let r = d.part1(&data);
+        assert_eq!(r, 13978427);
+    }
 }
