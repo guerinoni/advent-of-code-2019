@@ -100,7 +100,7 @@ impl Solver for Day5 {
         format!(
             "Solution part1 -> {}\n\tSolution part2 -> {}",
             self.part1(&data),
-            10
+            self.part2(&data)
         )
     }
 }
@@ -207,6 +207,13 @@ pub fn equals(cmds: &mut [i64], pos: &mut usize, params: &Vec<ParameterMode>) {
     let (n1, n2, d) = day2::get_args_3(cmds, pos, params);
     cmds[d as usize] = if n1 == n2 { 1 } else { 0 };
     *pos += 4;
+}
+
+impl Day5 {
+    fn part2(&self, data: &Vec<i64>) -> i64 {
+        let d = day2::process(data, 5);
+        d.1
+    }
 }
 
 #[cfg(test)]
@@ -355,5 +362,10 @@ mod tests {
                 1001
             )
         );
+
+        let d = Day5::new("input/day5");
+        let data = file_with_comma_to_vec(d.filename);
+        let r = d.part2(&data);
+        assert_eq!(r, 11189491);
     }
 }
