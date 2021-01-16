@@ -89,6 +89,10 @@ pub enum OpCode {
     Mul,
     Input,
     Output,
+    JumpIfTrue,
+    JumpIfFalse,
+    LessThan,
+    Equals,
     Halt,
 }
 
@@ -99,6 +103,10 @@ impl From<i64> for OpCode {
             2 => Self::Mul,
             3 => Self::Input,
             4 => Self::Output,
+            5 => Self::JumpIfTrue,
+            6 => Self::JumpIfFalse,
+            7 => Self::LessThan,
+            8 => Self::Equals,
             99 => Self::Halt,
             _ => panic!("unknown value {}", value),
         }
@@ -131,7 +139,7 @@ pub fn decode_destination(
     }
 }
 
-fn get_args_3(cmds: &mut [i64], pos: &usize, params: &Vec<ParameterMode>) -> (i64, i64, i64) {
+pub fn get_args_3(cmds: &mut [i64], pos: &usize, params: &Vec<ParameterMode>) -> (i64, i64, i64) {
     let num1 = decode_parameter(cmds, pos, 1, params);
     let num2 = decode_parameter(cmds, pos, 2, params);
     let dest = decode_destination(cmds, pos, 3, params);
@@ -190,6 +198,10 @@ pub fn process(commands: &[i64], input: i64) -> (Vec<i64>, i64) {
             OpCode::Mul => mul(&mut cmds, &mut pos, &params),
             OpCode::Input => day5::input(&mut cmds, &mut pos, &params, value),
             OpCode::Output => day5::output(&mut cmds, &mut pos, &params, &mut value),
+            OpCode::JumpIfTrue => day5::jump_if_true(&mut cmds, &mut pos, &params),
+            OpCode::JumpIfFalse => day5::jump_if_false(&mut cmds, &mut pos, &params),
+            OpCode::LessThan => day5::less_than(&mut cmds, &mut pos, &params),
+            OpCode::Equals => day5::equals(&mut cmds, &mut pos, &params),
             OpCode::Halt => break,
         }
 
@@ -260,6 +272,7 @@ impl Day2 {
         0
     }
 }
+
 #[cfg(test)]
 mod tests {
 
