@@ -117,7 +117,7 @@ pub fn decode_parameter(
     cmds: &mut [i64],
     pos: &usize,
     idx_param: usize,
-    params: &Vec<ParameterMode>,
+    params: &[ParameterMode],
 ) -> i64 {
     let p = cmds[pos + idx_param];
     match params[idx_param - 1] {
@@ -130,7 +130,7 @@ pub fn decode_destination(
     cmds: &mut [i64],
     pos: &usize,
     idx_param: usize,
-    params: &Vec<ParameterMode>,
+    params: &[ParameterMode],
 ) -> i64 {
     let d = cmds[pos + idx_param];
     match params[idx_param - 1] {
@@ -139,20 +139,20 @@ pub fn decode_destination(
     }
 }
 
-pub fn get_args_3(cmds: &mut [i64], pos: &usize, params: &Vec<ParameterMode>) -> (i64, i64, i64) {
+pub fn get_args_3(cmds: &mut [i64], pos: &usize, params: &[ParameterMode]) -> (i64, i64, i64) {
     let num1 = decode_parameter(cmds, pos, 1, params);
     let num2 = decode_parameter(cmds, pos, 2, params);
     let dest = decode_destination(cmds, pos, 3, params);
     (num1, num2, dest)
 }
 
-fn sum(cmds: &mut [i64], pos: &mut usize, params: &Vec<ParameterMode>) {
+fn sum(cmds: &mut [i64], pos: &mut usize, params: &[ParameterMode]) {
     let (n1, n2, d) = get_args_3(cmds, pos, params);
     cmds[d as usize] = n1 + n2;
     *pos += 4;
 }
 
-fn mul(cmds: &mut [i64], pos: &mut usize, params: &Vec<ParameterMode>) {
+fn mul(cmds: &mut [i64], pos: &mut usize, params: &[ParameterMode]) {
     let (n1, n2, d) = get_args_3(cmds, pos, params);
     cmds[d as usize] = n1 * n2;
     *pos += 4;
@@ -193,7 +193,7 @@ pub fn process(commands: &[i64], input: i64) -> (Vec<i64>, i64) {
     loop {
         let instructions = cmds[pos];
         let (op_code, params) = decode_instruction(instructions);
-        match OpCode::from(op_code) {
+        match op_code {
             OpCode::Sum => sum(&mut cmds, &mut pos, &params),
             OpCode::Mul => mul(&mut cmds, &mut pos, &params),
             OpCode::Input => day5::input(&mut cmds, &mut pos, &params, value),
