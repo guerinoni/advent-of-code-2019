@@ -106,24 +106,19 @@ impl Solver for Day5 {
 }
 
 impl Day5 {
-    fn part1(&self, data: &Vec<i64>) -> i64 {
+    fn part1(&self, data: &[i64]) -> i64 {
         let d = day2::process(data, 1);
         d.1
     }
 }
 
-pub fn input(cmds: &mut [i64], pos: &mut usize, params: &Vec<day2::ParameterMode>, input: i64) {
+pub fn input(cmds: &mut [i64], pos: &mut usize, params: &[day2::ParameterMode], input: i64) {
     let d = day2::decode_destination(cmds, pos, 1, params);
     cmds[d as usize] = input;
     *pos += 2;
 }
 
-pub fn output(
-    cmds: &mut [i64],
-    pos: &mut usize,
-    params: &Vec<day2::ParameterMode>,
-    input: &mut i64,
-) {
+pub fn output(cmds: &mut [i64], pos: &mut usize, params: &[day2::ParameterMode], input: &mut i64) {
     let n = day2::decode_parameter(cmds, pos, 1, params);
     *input = n;
     *pos += 2;
@@ -177,7 +172,7 @@ pub fn output(
  * What is the diagnostic code for system ID 5?
  */
 
-pub fn jump_if_true(cmds: &mut [i64], pos: &mut usize, params: &Vec<day2::ParameterMode>) {
+pub fn jump_if_true(cmds: &mut [i64], pos: &mut usize, params: &[day2::ParameterMode]) {
     let f = day2::decode_parameter(cmds, pos, 1, params);
     if f != 0 {
         let v = day2::decode_parameter(cmds, pos, 2, params);
@@ -187,7 +182,7 @@ pub fn jump_if_true(cmds: &mut [i64], pos: &mut usize, params: &Vec<day2::Parame
     *pos += 3;
 }
 
-pub fn jump_if_false(cmds: &mut [i64], pos: &mut usize, params: &Vec<day2::ParameterMode>) {
+pub fn jump_if_false(cmds: &mut [i64], pos: &mut usize, params: &[day2::ParameterMode]) {
     let f = day2::decode_parameter(cmds, pos, 1, params);
     if f == 0 {
         let v = day2::decode_parameter(cmds, pos, 2, params);
@@ -197,20 +192,20 @@ pub fn jump_if_false(cmds: &mut [i64], pos: &mut usize, params: &Vec<day2::Param
     *pos += 3;
 }
 
-pub fn less_than(cmds: &mut [i64], pos: &mut usize, params: &Vec<ParameterMode>) {
+pub fn less_than(cmds: &mut [i64], pos: &mut usize, params: &[ParameterMode]) {
     let (n1, n2, d) = day2::get_args_3(cmds, pos, params);
     cmds[d as usize] = if n1 < n2 { 1 } else { 0 };
     *pos += 4;
 }
 
-pub fn equals(cmds: &mut [i64], pos: &mut usize, params: &Vec<ParameterMode>) {
+pub fn equals(cmds: &mut [i64], pos: &mut usize, params: &[ParameterMode]) {
     let (n1, n2, d) = day2::get_args_3(cmds, pos, params);
     cmds[d as usize] = if n1 == n2 { 1 } else { 0 };
     *pos += 4;
 }
 
 impl Day5 {
-    fn part2(&self, data: &Vec<i64>) -> i64 {
+    fn part2(&self, data: &[i64]) -> i64 {
         let d = day2::process(data, 5);
         d.1
     }
