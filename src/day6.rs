@@ -1,4 +1,4 @@
-use std::vec;
+use std::{any::type_name, vec};
 
 use crate::solver::*;
 
@@ -74,6 +74,7 @@ impl Solver for Day6 {
         format!("Solution part1 -> {}\n\tSolution part2 -> {}", 10, 10)
     }
 }
+#[derive(Clone)]
 struct Planet<'a> {
     name: &'a str,
     father: Option<Box<Planet<'a>>>,
@@ -81,12 +82,35 @@ struct Planet<'a> {
 
 impl Day6 {
     fn part1(&self, data: &[String]) -> i64 {
+        let mut planets = Vec::new();
         for d in data {
-            let planets = d.split(')').collect::<Vec<_>>();
-            let p0 = Planet {name : planets[0], father: None};
-            let p1 = Planet { name : planets[1], father: Some(Box::new(p0))};
+            let planets_relations = d.split(')').collect::<Vec<_>>();
+            let p0 = Planet {
+                name: planets_relations[0],
+                father: None,
+            };
+            let p1 = Planet {
+                name: planets_relations[1],
+                father: Some(Box::new(p0.clone())),
+            };
+            planets.push(p0);
+            planets.push(p1);
         }
-        0
+
+        let mut counter = 0;
+        for p in planets {
+            let mut f = p.father.as_ref();
+            loop {
+                match f {
+                    Some(parent) => {
+                        counter += 1;
+                        f = parent.father.as_ref()
+                    }
+                    None => break,
+                }
+            }
+        }
+        counter
     }
 }
 
@@ -98,6 +122,13 @@ mod tests {
 
     #[test]
     fn validate() {
-        assert_eq!(true, true);
+        let d = Day6::new("");
+        let intput = vec![
+            "COM)B", "B)C", "C)D", "D)E", "E)F", "B)G", "G)H", "D)I", "E)J", "J)K", "K)L",
+        ]
+        .iter()
+        .map(|&s| s.to_string())
+        .collect::<Vec<_>>();
+        assert_eq!(d.part1(&intput), 42);
     }
 }
