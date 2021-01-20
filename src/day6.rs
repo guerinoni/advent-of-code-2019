@@ -1,4 +1,4 @@
-use std::{any::type_name, vec};
+use std::collections::HashMap;
 
 use crate::solver::*;
 
@@ -71,46 +71,39 @@ impl Solver for Day6 {
     }
 
     fn solve(&self) -> String {
-        format!("Solution part1 -> {}\n\tSolution part2 -> {}", 10, 10)
+        let data = file_to_vec_of_string(self.filename);
+        format!(
+            "Solution part1 -> {}\n\tSolution part2 -> {}",
+            self.part1(&data),
+            10
+        )
     }
-}
-#[derive(Clone)]
-struct Planet<'a> {
-    name: &'a str,
-    father: Option<Box<Planet<'a>>>,
 }
 
 impl Day6 {
     fn part1(&self, data: &[String]) -> i64 {
-        let mut planets = Vec::new();
-        for d in data {
-            let planets_relations = d.split(')').collect::<Vec<_>>();
-            let p0 = Planet {
-                name: planets_relations[0],
-                father: None,
-            };
-            let p1 = Planet {
-                name: planets_relations[1],
-                father: Some(Box::new(p0.clone())),
-            };
-            planets.push(p0);
-            planets.push(p1);
+        let map = data
+            .iter()
+            .map(|d| {
+                let mut i = d.split(')').rev();
+                (i.next().unwrap().to_string(), i.next().unwrap().to_string())
+            })
+            .collect::<HashMap<String, String>>();
+
+        let mut sum = 0;
+        for item in map.keys() {
+            sum += count_from(&map, item);
         }
 
-        let mut counter = 0;
-        for p in planets {
-            let mut f = p.father.as_ref();
-            loop {
-                match f {
-                    Some(parent) => {
-                        counter += 1;
-                        f = parent.father.as_ref()
-                    }
-                    None => break,
-                }
-            }
-        }
-        counter
+        sum
+    }
+}
+
+fn count_from(map: &HashMap<String, String>, start: &str) -> i64 {
+    let f = map.get(start);
+    match f {
+        Some(value) => 1 + count_from(map, value),
+        None => 0,
     }
 }
 
@@ -123,6 +116,7 @@ mod tests {
     #[test]
     fn validate() {
         let d = Day6::new("");
+
         let intput = vec![
             "COM)B", "B)C", "C)D", "D)E", "E)F", "B)G", "G)H", "D)I", "E)J", "J)K", "K)L",
         ]
@@ -130,5 +124,8 @@ mod tests {
         .map(|&s| s.to_string())
         .collect::<Vec<_>>();
         assert_eq!(d.part1(&intput), 42);
+
+        let data = file_to_vec_of_string("input/day6");
+        assert_eq!(d.part1(&data), 453028);
     }
 }

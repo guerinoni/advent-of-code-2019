@@ -29,7 +29,7 @@ pub fn file_with_comma_to_vec(path: &str) -> Vec<i64> {
         .collect::<Vec<_>>()
 }
 
-pub fn file_to_vec_of_string(path: &str) -> Vec<Vec<String>> {
+pub fn file_to_vec_of_vec_string(path: &str) -> Vec<Vec<String>> {
     let file = File::open(path).expect("cannot open file");
     let br = BufReader::new(file);
     let mut v = Vec::new();
@@ -37,6 +37,18 @@ pub fn file_to_vec_of_string(path: &str) -> Vec<Vec<String>> {
         let line = l.unwrap();
         let vec = line.split(',').map(String::from).collect::<Vec<String>>();
         v.push(vec);
+    }
+
+    v
+}
+
+pub fn file_to_vec_of_string(path: &str) -> Vec<String> {
+    let file = File::open(path).expect("cannot open file");
+    let br = BufReader::new(file);
+    let mut v = Vec::new();
+    for l in br.lines() {
+        let line = l.unwrap();
+        v.push(line);
     }
 
     v

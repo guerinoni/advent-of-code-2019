@@ -25,4 +25,7 @@ fn main() {
 
     let d = day5::Day5::new("input/day5");
     println!("Day5 -> {}", d.solve());
+
+    let d = day6::Day6::new("input/day6");
+    println!("Day6 -> {}", d.solve());
 }
