@@ -75,7 +75,7 @@ impl Solver for Day6 {
         format!(
             "Solution part1 -> {}\n\tSolution part2 -> {}",
             self.part1(&data),
-            10
+            self.part2(&data),
         )
     }
 }
@@ -107,6 +107,92 @@ fn count_from(map: &HashMap<String, String>, start: &str) -> i64 {
     }
 }
 
+/*
+ * --- Part Two ---
+ * Now, you just need to figure out how many orbital transfers you (YOU) need to take to get to Santa (SAN).
+ *
+ * You start at the object YOU are orbiting; your destination is the object SAN is orbiting.
+ * An orbital transfer lets you move from any object to an object orbiting or orbited by that object.
+ *
+ * For example, suppose you have the following map:
+ *
+ * COM)B
+ * B)C
+ * C)D
+ * D)E
+ * E)F
+ * B)G
+ * G)H
+ * D)I
+ * E)J
+ * J)K
+ * K)L
+ * K)YOU
+ * I)SAN
+ * Visually, the above map of orbits looks like this:
+ *
+ *                           YOU
+ *                          /
+ *         G - H       J - K - L
+ *        /           /
+ * COM - B - C - D - E - F
+ *                \
+ *                 I - SAN
+ * In this example, YOU are in orbit around K, and SAN is in orbit around I. To move from K to I, a minimum of 4 orbital transfers are required:
+ *
+ * K to J
+ * J to E
+ * E to D
+ * D to I
+ * Afterward, the map of orbits looks like this:
+ *
+ *         G - H       J - K - L
+ *        /           /
+ * COM - B - C - D - E - F
+ *                \
+ *                 I - SAN
+ *                  \
+ *                   YOU
+ * What is the minimum number of orbital transfers required to move from the object YOU are orbiting to the object SAN is orbiting?
+ * (Between the objects they are orbiting - not between YOU and SAN.)
+*/
+
+impl Day6 {
+    fn part2(&self, data: &[String]) -> usize {
+        let map = data
+            .iter()
+            .map(|d| {
+                let mut i = d.split(')').rev();
+                (i.next().unwrap().to_string(), i.next().unwrap().to_string())
+            })
+            .collect::<HashMap<String, String>>();
+
+        let v1 = all_parents(&String::from("YOU"), &map);
+        let v2 = all_parents(&String::from("SAN"), &map);
+
+        for v in v1.iter().enumerate() {
+            if v2.contains(v.1) {
+                let i = v2.iter().enumerate().find(|item| item.1 == v.1).unwrap();
+                return i.0 + v.0;
+            }
+        }
+
+        0
+    }
+}
+
+fn all_parents(start: &String, map: &HashMap<String, String>) -> Vec<String> {
+    let mut all = Vec::new();
+    let mut current = map.get(start);
+
+    while let Some(p) = current {
+        all.push(p.clone());
+        current = map.get(p);
+    }
+
+    all
+}
+
 #[cfg(test)]
 mod tests {
     use std::vec;
@@ -123,9 +209,20 @@ mod tests {
         .iter()
         .map(|&s| s.to_string())
         .collect::<Vec<_>>();
+
         assert_eq!(d.part1(&intput), 42);
 
         let data = file_to_vec_of_string("input/day6");
         assert_eq!(d.part1(&data), 453028);
+
+        let input = vec![
+            "COM)B", "B)C", "C)D", "D)E", "E)F", "B)G", "G)H", "D)I", "E)J", "J)K", "K)L", "K)YOU",
+            "I)SAN",
+        ]
+        .iter()
+        .map(|&t| t.to_string())
+        .collect::<Vec<_>>();
+
+        assert_eq!(d.part2(&input), 4);
     }
 }
