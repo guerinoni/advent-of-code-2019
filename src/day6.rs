@@ -181,7 +181,7 @@ impl Day6 {
     }
 }
 
-fn all_parents(start: &String, map: &HashMap<String, String>) -> Vec<String> {
+fn all_parents(start: &str, map: &HashMap<String, String>) -> Vec<String> {
     let mut all = Vec::new();
     let mut current = map.get(start);
 
@@ -224,5 +224,8 @@ mod tests {
         .collect::<Vec<_>>();
 
         assert_eq!(d.part2(&input), 4);
+
+        let data = file_to_vec_of_string("input/day6");
+        assert_eq!(d.part2(&data), 562);
     }
 }
