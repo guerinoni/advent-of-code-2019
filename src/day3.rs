@@ -63,7 +63,7 @@ impl Solver for Day3 {
     }
 
     fn solve(&self) -> String {
-        let data = file_to_vec_of_string(self.filename);
+        let data = file_to_vec_of_vec_string(self.filename);
         let vec1 = data[0].iter().map(|s| s.as_ref()).collect::<Vec<&str>>();
         let vec2 = data[1].iter().map(|s| s.as_ref()).collect::<Vec<&str>>();
         let p1 = self.part1(vec1.as_slice(), vec2.as_slice());
