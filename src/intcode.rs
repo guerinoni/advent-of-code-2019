@@ -74,7 +74,6 @@ fn decode_instruction(instruction: i64) -> (OpCode, Vec<ParameterMode>) {
 impl IntCode {
     pub fn do_step(&mut self) {
         let cmd = self.program[self.idx];
-        dbg!(cmd);
         let (op_code, params) = decode_instruction(cmd);
         match op_code {
             OpCode::Sum => self.sum(&params),

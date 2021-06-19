@@ -42,16 +42,14 @@ use itertools::Itertools;
  * Here are some example programs:
  *
  * Max thruster signal 43210 (from phase setting sequence 4,3,2,1,0):
- *
  * 3,15,3,16,1002,16,10,16,1,16,15,15,4,15,99,0,0
+ *
  * Max thruster signal 54321 (from phase setting sequence 0,1,2,3,4):
+ * 3,23,3,24,1002,24,10,24,1002,23,-1,23,101,5,23,23,1,24,23,23,4,23,99,0,0
  *
- * 3,23,3,24,1002,24,10,24,1002,23,-1,23,
- * 101,5,23,23,1,24,23,23,4,23,99,0,0
  * Max thruster signal 65210 (from phase setting sequence 1,0,4,3,2):
+ * 3,31,3,32,1002,32,10,32,1001,31,-2,31,1007,31,0,33,1002,33,7,33,1,33,31,31,1,32,31,31,4,31,99,0,0,0
  *
- * 3,31,3,32,1002,32,10,32,1001,31,-2,31,1007,31,0,33,
- * 1002,33,7,33,1,33,31,31,1,32,31,31,4,31,99,0,0,0
  * Try every combination of phase settings on the amplifiers. What is the highest signal that can be sent to the thrusters?
 */
 
@@ -70,60 +68,63 @@ impl Solver for Day7 {
         let data = file_with_comma_to_vec(self.filename);
         format!(
             "Solution part1 -> {}\n\tSolution part2 -> {}",
-            self.part1(&data),
+            self.part1(data),
             10,
         )
     }
 }
 
 impl Day7 {
-    fn part1(&self, data: &[i64]) -> i64 {
-        let result = (0..5)
+    fn part1(&self, data: Vec<i64>) -> i64 {
+        (0..5)
             .permutations(5)
-            .map(|phases| self.process(data, &phases))
+            .map(|sequence| self.process(&data, &sequence))
             .max()
-            .unwrap();
-        result
+            .unwrap()
     }
 
-    fn process(&self, commands: &[i64], phases: &[i64]) -> i64 {
-        // let mut output = Vec::new();
-        // let cpus = vec![day2::Day2::new("")];
-        // for &ph in phases {
-        // let ret = day2::process(commands, ph);
-        // input = output.1;
-        // dbg!(input);
-        // }
+    fn process(&self, commands: &[i64], sequence: &[i64]) -> i64 {
+        let mut signal = 0;
+        for s in sequence {
+            let mut cpu = crate::intcode::new(commands.into());
+            cpu.set_input(*s);
+            cpu.do_step();
+            cpu.set_input(signal);
+            cpu.do_step();
+            cpu.run();
+            signal = cpu.get_output();
+        }
 
-        // input
-        0
+        signal
     }
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-//     #[test]
-//     fn validate() {
-//         let d = Day7::new("");
-//         // let ret = d.process(
-//         //     vec![
-//         //         3, 15, 3, 16, 1002, 16, 10, 16, 1, 16, 15, 15, 4, 15, 99, 0, 0,
-//         //     ]
-//         //     .as_ref(),
-//         //     vec![4, 3, 2, 1, 0].as_ref(),
-//         // );
-//         // assert_eq!(ret, 0);
-
-//         let ret = d.process(
-//             vec![
-//                 3, 23, 3, 24, 1002, 24, 10, 24, 1002, 23, -1, 23, 101, 5, 23, 23, 1, 24, 23, 23, 4,
-//                 23, 99, 0, 0,
-//             ]
-//             .as_ref(),
-//             vec![0, 1, 2, 3, 4].as_ref(),
-//         );
-//         assert_eq!(ret, 0);
-//     }
-// }
+    #[test]
+    fn validate() {
+        let d = Day7::new("");
+        assert_eq!(
+            d.part1(vec![
+                3, 15, 3, 16, 1002, 16, 10, 16, 1, 16, 15, 15, 4, 15, 99, 0, 0
+            ]),
+            43210
+        );
+        assert_eq!(
+            d.part1(vec![
+                3, 23, 3, 24, 1002, 24, 10, 24, 1002, 23, -1, 23, 101, 5, 23, 23, 1, 24, 23, 23, 4,
+                23, 99, 0, 0
+            ]),
+            54321
+        );
+        assert_eq!(
+            d.part1(vec![
+                3, 31, 3, 32, 1002, 32, 10, 32, 1001, 31, -2, 31, 1007, 31, 0, 33, 1002, 33, 7, 33,
+                1, 33, 31, 31, 1, 32, 31, 31, 4, 31, 99, 0, 0, 0
+            ]),
+            65210
+        );
+    }
+}
