@@ -1,6 +1,7 @@
-use crate::{day5, solver::*};
+use crate::solver::*;
 
 /*
+ * --- Day 2: 1202 Program Alarm ---
  * On the way to your gravity assist around the Moon, your ship computer beeps angrily about a "1202 program alarm".
  * On the radio, an Elf is already explaining how to handle the situation: "Don't worry, that's perfectly norma--" The ship computer bursts into flames.
  *
@@ -75,148 +76,19 @@ impl Solver for Day2 {
 
     fn solve(&self) -> String {
         let mut data = file_with_comma_to_vec(self.filename);
-        let p2 = self.part2(&data, 19690720);
+        let p2 = self.part2(data.clone(), 19690720);
         data[1] = 12_i64;
         data[2] = 2_i64;
-        let p1 = self.part1(&data);
+        let p1 = self.part1(data);
         format!("Solution part1 -> {}\n\tSolution part2 -> {}", p1, p2)
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
-pub enum OpCode {
-    Sum = 1,
-    Mul,
-    Input,
-    Output,
-    JumpIfTrue,
-    JumpIfFalse,
-    LessThan,
-    Equals,
-    Halt,
-}
-
-impl From<i64> for OpCode {
-    fn from(value: i64) -> OpCode {
-        match value {
-            1 => Self::Sum,
-            2 => Self::Mul,
-            3 => Self::Input,
-            4 => Self::Output,
-            5 => Self::JumpIfTrue,
-            6 => Self::JumpIfFalse,
-            7 => Self::LessThan,
-            8 => Self::Equals,
-            99 => Self::Halt,
-            _ => panic!("unknown value {}", value),
-        }
-    }
-}
-
-pub fn decode_parameter(
-    cmds: &mut [i64],
-    pos: &usize,
-    idx_param: usize,
-    params: &[ParameterMode],
-) -> i64 {
-    let p = cmds[pos + idx_param];
-    match params[idx_param - 1] {
-        ParameterMode::Position => cmds[p as usize],
-        ParameterMode::Immediate => p,
-    }
-}
-
-pub fn decode_destination(
-    cmds: &mut [i64],
-    pos: &usize,
-    idx_param: usize,
-    params: &[ParameterMode],
-) -> i64 {
-    let d = cmds[pos + idx_param];
-    match params[idx_param - 1] {
-        ParameterMode::Position => d,
-        ParameterMode::Immediate => panic!("invalid mode for dest"),
-    }
-}
-
-pub fn get_args_3(cmds: &mut [i64], pos: &usize, params: &[ParameterMode]) -> (i64, i64, i64) {
-    let num1 = decode_parameter(cmds, pos, 1, params);
-    let num2 = decode_parameter(cmds, pos, 2, params);
-    let dest = decode_destination(cmds, pos, 3, params);
-    (num1, num2, dest)
-}
-
-fn sum(cmds: &mut [i64], pos: &mut usize, params: &[ParameterMode]) {
-    let (n1, n2, d) = get_args_3(cmds, pos, params);
-    cmds[d as usize] = n1 + n2;
-    *pos += 4;
-}
-
-fn mul(cmds: &mut [i64], pos: &mut usize, params: &[ParameterMode]) {
-    let (n1, n2, d) = get_args_3(cmds, pos, params);
-    cmds[d as usize] = n1 * n2;
-    *pos += 4;
-}
-
-#[derive(Debug, Eq, PartialEq)]
-pub enum ParameterMode {
-    Position,
-    Immediate,
-}
-
-impl From<i64> for ParameterMode {
-    fn from(n: i64) -> Self {
-        match n {
-            0 => ParameterMode::Position,
-            1 => ParameterMode::Immediate,
-            _ => panic!("invalid parameter mode"),
-        }
-    }
-}
-
-fn decode_instruction(instruction: i64) -> (OpCode, Vec<ParameterMode>) {
-    let opcode = instruction % 100;
-    let param_modes = vec![
-        ((instruction / 100) % 10).into(),
-        ((instruction / 1000) % 10).into(),
-        ((instruction / 10000) % 10).into(),
-    ];
-
-    (opcode.into(), param_modes)
-}
-
-pub fn process(commands: &[i64], input: i64) -> (Vec<i64>, i64) {
-    let mut cmds = commands.to_vec();
-    let mut pos = 0;
-    let mut value = input;
-
-    loop {
-        let instructions = cmds[pos];
-        let (op_code, params) = decode_instruction(instructions);
-        match op_code {
-            OpCode::Sum => sum(&mut cmds, &mut pos, &params),
-            OpCode::Mul => mul(&mut cmds, &mut pos, &params),
-            OpCode::Input => day5::input(&mut cmds, &mut pos, &params, value),
-            OpCode::Output => day5::output(&mut cmds, &mut pos, &params, &mut value),
-            OpCode::JumpIfTrue => day5::jump_if_true(&mut cmds, &mut pos, &params),
-            OpCode::JumpIfFalse => day5::jump_if_false(&mut cmds, &mut pos, &params),
-            OpCode::LessThan => day5::less_than(&mut cmds, &mut pos, &params),
-            OpCode::Equals => day5::equals(&mut cmds, &mut pos, &params),
-            OpCode::Halt => break,
-        }
-
-        if pos >= commands.len() {
-            break;
-        }
-    }
-
-    (cmds, value)
-}
-
 impl Day2 {
-    pub fn part1(&self, commands: &[i64]) -> i64 {
-        let final_commands = process(commands, 0);
-        final_commands.0[0]
+    pub fn part1(&self, commands: Vec<i64>) -> i64 {
+        let mut cpu = crate::intcode::new(commands);
+        cpu.run();
+        cpu.first()
     }
 }
 
@@ -257,13 +129,13 @@ impl Day2 {
  */
 
 impl Day2 {
-    fn part2(&self, commands: &[i64], num_to_search: i64) -> i64 {
-        let mut cmds = commands.to_vec();
+    fn part2(&self, commands: Vec<i64>, num_to_search: i64) -> i64 {
+        let mut cmds = commands;
         for noun in 0..99 {
             for verb in 0..99 {
                 cmds[1] = noun;
                 cmds[2] = verb;
-                let result = self.part1(&cmds);
+                let result = self.part1(cmds.clone());
                 if result == num_to_search {
                     return 100 * noun + verb;
                 }
@@ -281,35 +153,11 @@ mod tests {
     #[test]
     fn validation() {
         let d = Day2::new("");
-        assert_eq!(d.part1(&[1, 0, 0, 0, 99]), 2);
-        assert_eq!(d.part1(&[2, 3, 0, 3, 99]), 2);
-        assert_eq!(d.part1(&[2, 4, 4, 5, 99, 0]), 2);
-        assert_eq!(d.part1(&[1, 1, 1, 4, 99, 5, 6, 0, 99]), 30);
-        assert_eq!(d.part1(&[1, 1, 1, 2, 99, 5, 6, 0, 99]), 1);
-        assert_eq!(d.part2(&[1, 1, 1, 2, 99, 5, 6, 0, 99], 1), 0);
-
-        assert_eq!(
-            decode_instruction(1002),
-            (
-                OpCode::Mul,
-                vec![
-                    ParameterMode::Position,
-                    ParameterMode::Immediate,
-                    ParameterMode::Position,
-                ]
-            )
-        );
-
-        assert_eq!(
-            decode_instruction(1),
-            (
-                OpCode::Sum,
-                vec![
-                    ParameterMode::Position,
-                    ParameterMode::Position,
-                    ParameterMode::Position,
-                ]
-            )
-        );
+        assert_eq!(d.part1(vec![1, 0, 0, 0, 99]), 2);
+        assert_eq!(d.part1(vec![2, 3, 0, 3, 99]), 2);
+        assert_eq!(d.part1(vec![2, 4, 4, 5, 99, 0]), 2);
+        assert_eq!(d.part1(vec![1, 1, 1, 4, 99, 5, 6, 0, 99]), 30);
+        assert_eq!(d.part1(vec![1, 1, 1, 2, 99, 5, 6, 0, 99]), 1);
+        assert_eq!(d.part2(vec![1, 1, 1, 2, 99, 5, 6, 0, 99], 1), 0);
     }
 }

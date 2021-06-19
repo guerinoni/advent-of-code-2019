@@ -1,4 +1,5 @@
 use crate::solver::*;
+use itertools::Itertools;
 
 /*
  * --- Day 7: Amplification Circuit ---
@@ -66,17 +67,63 @@ impl Solver for Day7 {
     }
 
     fn solve(&self) -> String {
-        let _data = file_to_vec_of_string(self.filename);
-        format!("Solution part1 -> {}\n\tSolution part2 -> {}", 10, 10,)
+        let data = file_with_comma_to_vec(self.filename);
+        format!(
+            "Solution part1 -> {}\n\tSolution part2 -> {}",
+            self.part1(&data),
+            10,
+        )
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+impl Day7 {
+    fn part1(&self, data: &[i64]) -> i64 {
+        let result = (0..5)
+            .permutations(5)
+            .map(|phases| self.process(data, &phases))
+            .max()
+            .unwrap();
+        result
+    }
 
-    #[test]
-    fn validate() {
-        assert_eq!(true, true);
+    fn process(&self, commands: &[i64], phases: &[i64]) -> i64 {
+        // let mut output = Vec::new();
+        // let cpus = vec![day2::Day2::new("")];
+        // for &ph in phases {
+        // let ret = day2::process(commands, ph);
+        // input = output.1;
+        // dbg!(input);
+        // }
+
+        // input
+        0
     }
 }
+
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
+
+//     #[test]
+//     fn validate() {
+//         let d = Day7::new("");
+//         // let ret = d.process(
+//         //     vec![
+//         //         3, 15, 3, 16, 1002, 16, 10, 16, 1, 16, 15, 15, 4, 15, 99, 0, 0,
+//         //     ]
+//         //     .as_ref(),
+//         //     vec![4, 3, 2, 1, 0].as_ref(),
+//         // );
+//         // assert_eq!(ret, 0);
+
+//         let ret = d.process(
+//             vec![
+//                 3, 23, 3, 24, 1002, 24, 10, 24, 1002, 23, -1, 23, 101, 5, 23, 23, 1, 24, 23, 23, 4,
+//                 23, 99, 0, 0,
+//             ]
+//             .as_ref(),
+//             vec![0, 1, 2, 3, 4].as_ref(),
+//         );
+//         assert_eq!(ret, 0);
+//     }
+// }

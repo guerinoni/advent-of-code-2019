@@ -58,6 +58,7 @@ impl Day1 {
 fn calculate_fuel(v: i64) -> f64 {
     (v as f64 / 3.0).floor() - 2.0
 }
+
 /*
  * --- Part Two ---
  * During the second Go / No Go poll, the Elf in charge of the Rocket Equation Double-Checker stops the launch sequence.

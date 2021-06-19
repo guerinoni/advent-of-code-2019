@@ -5,6 +5,7 @@ mod day4;
 mod day5;
 mod day6;
 mod day7;
+mod intcode;
 mod solver;
 
 use solver::*;
@@ -29,4 +30,7 @@ fn main() {
 
     let d = day6::Day6::new("input/day6");
     println!("Day6 -> {}", d.solve());
+
+    let d = day7::Day7::new("input/day7");
+    println!("Day7 -> {}", d.solve());
 }
