@@ -105,7 +105,7 @@ impl Solver for Day5 {
 
 impl Day5 {
     fn part1(&self, data: Vec<i64>, input: i64) -> i64 {
-        let mut cpu = crate::intcode::new(data);
+        let mut cpu = crate::intcode::new(data, false);
         cpu.set_input(input);
         cpu.run();
         cpu.get_output()
@@ -162,7 +162,7 @@ impl Day5 {
 
 impl Day5 {
     fn part2(&self, data: Vec<i64>, input: i64) -> i64 {
-        let mut cpu = crate::intcode::new(data);
+        let mut cpu = crate::intcode::new(data, false);
         cpu.set_input(input);
         cpu.run();
         cpu.get_output()

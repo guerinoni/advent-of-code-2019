@@ -49,14 +49,18 @@ pub struct IntCode {
     idx: usize,
     register: i64,
     halt: bool,
+    break_on_output_code: bool,
+    output_break: bool,
 }
 
-pub fn new(program: Vec<i64>) -> IntCode {
+pub fn new(program: Vec<i64>, break_on_output_code: bool) -> IntCode {
     IntCode {
         program,
         idx: 0,
         register: 0,
         halt: false,
+        break_on_output_code,
+        output_break: false,
     }
 }
 
@@ -88,8 +92,16 @@ impl IntCode {
         }
     }
 
+    pub fn current_opcode(&self) -> OpCode {
+        let cmd = self.program[self.idx];
+        let (op_code, _) = decode_instruction(cmd);
+        op_code
+    }
+
     pub fn run(&mut self) {
-        while !self.halt {
+        self.halt = false;
+        self.output_break = false;
+        while !self.halt && !self.output_break {
             self.do_step();
         }
     }
@@ -169,6 +181,9 @@ impl IntCode {
         let n = self.read_value(0, parameter_modes);
         self.register = n;
         self.idx += 2;
+        if self.break_on_output_code {
+            self.output_break = true;
+        }
     }
 
     fn jump_if_true(&mut self, parameter_modes: &[ParameterMode]) {

@@ -86,7 +86,7 @@ impl Solver for Day2 {
 
 impl Day2 {
     pub fn part1(&self, commands: Vec<i64>) -> i64 {
-        let mut cpu = crate::intcode::new(commands);
+        let mut cpu = crate::intcode::new(commands, false);
         cpu.run();
         cpu.first()
     }
