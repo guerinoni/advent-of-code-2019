@@ -1,6 +1,4 @@
-use day2::ParameterMode;
-
-use crate::{day2, solver::*};
+use crate::solver::*;
 
 /*
  * --- Day 5: Sunny with a Chance of Asteroids ---
@@ -99,29 +97,19 @@ impl Solver for Day5 {
 
         format!(
             "Solution part1 -> {}\n\tSolution part2 -> {}",
-            self.part1(&data),
-            self.part2(&data)
+            self.part1(data.clone(), 1),
+            self.part2(data, 1)
         )
     }
 }
 
 impl Day5 {
-    fn part1(&self, data: &[i64]) -> i64 {
-        let d = day2::process(data, 1);
-        d.1
+    fn part1(&self, data: Vec<i64>, input: i64) -> i64 {
+        let mut cpu = crate::intcode::new(data, false);
+        cpu.set_input(input);
+        cpu.run();
+        cpu.get_output()
     }
-}
-
-pub fn input(cmds: &mut [i64], pos: &mut usize, params: &[day2::ParameterMode], input: i64) {
-    let d = day2::decode_destination(cmds, pos, 1, params);
-    cmds[d as usize] = input;
-    *pos += 2;
-}
-
-pub fn output(cmds: &mut [i64], pos: &mut usize, params: &[day2::ParameterMode], input: &mut i64) {
-    let n = day2::decode_parameter(cmds, pos, 1, params);
-    *input = n;
-    *pos += 2;
 }
 
 /*
@@ -172,42 +160,12 @@ pub fn output(cmds: &mut [i64], pos: &mut usize, params: &[day2::ParameterMode],
  * What is the diagnostic code for system ID 5?
  */
 
-pub fn jump_if_true(cmds: &mut [i64], pos: &mut usize, params: &[day2::ParameterMode]) {
-    let f = day2::decode_parameter(cmds, pos, 1, params);
-    if f != 0 {
-        let v = day2::decode_parameter(cmds, pos, 2, params);
-        *pos = v as usize;
-        return;
-    }
-    *pos += 3;
-}
-
-pub fn jump_if_false(cmds: &mut [i64], pos: &mut usize, params: &[day2::ParameterMode]) {
-    let f = day2::decode_parameter(cmds, pos, 1, params);
-    if f == 0 {
-        let v = day2::decode_parameter(cmds, pos, 2, params);
-        *pos = v as usize;
-        return;
-    }
-    *pos += 3;
-}
-
-pub fn less_than(cmds: &mut [i64], pos: &mut usize, params: &[ParameterMode]) {
-    let (n1, n2, d) = day2::get_args_3(cmds, pos, params);
-    cmds[d as usize] = if n1 < n2 { 1 } else { 0 };
-    *pos += 4;
-}
-
-pub fn equals(cmds: &mut [i64], pos: &mut usize, params: &[ParameterMode]) {
-    let (n1, n2, d) = day2::get_args_3(cmds, pos, params);
-    cmds[d as usize] = if n1 == n2 { 1 } else { 0 };
-    *pos += 4;
-}
-
 impl Day5 {
-    fn part2(&self, data: &[i64]) -> i64 {
-        let d = day2::process(data, 5);
-        d.1
+    fn part2(&self, data: Vec<i64>, input: i64) -> i64 {
+        let mut cpu = crate::intcode::new(data, false);
+        cpu.set_input(input);
+        cpu.run();
+        cpu.get_output()
     }
 }
 
@@ -219,148 +177,80 @@ mod tests {
 
     #[test]
     fn validate() {
-        assert_eq!(
-            day2::process(&[3, 0, 4, 0, 99], 1),
-            (vec![1, 0, 4, 0, 99], 1)
-        );
+        let d = Day5::new("");
+        assert_eq!(d.part1(vec![3, 0, 4, 0, 99], 1), 1);
+        assert_eq!(d.part1(vec![3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8], 8), 1);
+        assert_eq!(d.part1(vec![3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8], 1), 0);
+        assert_eq!(d.part1(vec![3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8], 9), 0);
+        assert_eq!(d.part1(vec![3, 3, 1108, -1, 8, 3, 4, 3, 99], 8), 1);
+        assert_eq!(d.part1(vec![3, 3, 1108, -1, 8, 3, 4, 3, 99], 0), 0);
+        assert_eq!(d.part1(vec![3, 3, 1107, -1, 8, 3, 4, 3, 99], 7), 1);
+        assert_eq!(d.part1(vec![3, 3, 1107, -1, 8, 3, 4, 3, 99], 9), 0);
 
         let d = Day5::new("input/day5");
         let data = file_with_comma_to_vec(d.filename);
-        let r = d.part1(&data);
+        let r = d.part1(data, 1);
         assert_eq!(r, 13978427);
 
         assert_eq!(
-            day2::process(&[3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8], 8),
-            (vec![3, 9, 8, 9, 10, 9, 4, 9, 99, 1, 8], 1)
-        );
-
-        assert_eq!(
-            day2::process(&[3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8], 1),
-            (vec![3, 9, 8, 9, 10, 9, 4, 9, 99, 0, 8], 0)
-        );
-
-        assert_eq!(
-            day2::process(&[3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8], 7),
-            (vec![3, 9, 7, 9, 10, 9, 4, 9, 99, 1, 8], 1)
-        );
-
-        assert_eq!(
-            day2::process(&[3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8], 9),
-            (vec![3, 9, 7, 9, 10, 9, 4, 9, 99, 0, 8], 0)
-        );
-
-        assert_eq!(
-            day2::process(&[3, 3, 1108, -1, 8, 3, 4, 3, 99], 8),
-            (vec![3, 3, 1108, 1, 8, 3, 4, 3, 99], 1)
-        );
-
-        assert_eq!(
-            day2::process(&[3, 3, 1108, -1, 8, 3, 4, 3, 99], 0),
-            (vec![3, 3, 1108, 0, 8, 3, 4, 3, 99], 0)
-        );
-
-        assert_eq!(
-            day2::process(&[3, 3, 1107, -1, 8, 3, 4, 3, 99], 7),
-            (vec![3, 3, 1107, 1, 8, 3, 4, 3, 99], 1)
-        );
-
-        assert_eq!(
-            day2::process(&[3, 3, 1107, -1, 8, 3, 4, 3, 99], 9),
-            (vec![3, 3, 1107, 0, 8, 3, 4, 3, 99], 0)
-        );
-
-        assert_eq!(
-            day2::process(
-                &[3, 12, 6, 12, 15, 1, 13, 14, 13, 4, 13, 99, -1, 0, 1, 9],
+            d.part2(
+                vec![3, 12, 6, 12, 15, 1, 13, 14, 13, 4, 13, 99, -1, 0, 1, 9],
                 0
             ),
-            (
-                vec![3, 12, 6, 12, 15, 1, 13, 14, 13, 4, 13, 99, 0, 0, 1, 9],
-                0
-            )
+            0
         );
-
         assert_eq!(
-            day2::process(
-                &[3, 12, 6, 12, 15, 1, 13, 14, 13, 4, 13, 99, -1, 0, 1, 9],
+            d.part2(
+                vec![3, 12, 6, 12, 15, 1, 13, 14, 13, 4, 13, 99, -1, 0, 1, 9],
                 5
             ),
-            (
-                vec![3, 12, 6, 12, 15, 1, 13, 14, 13, 4, 13, 99, 5, 1, 1, 9],
-                1
-            )
+            1
         );
-
         assert_eq!(
-            day2::process(&[3, 3, 1105, -1, 9, 1101, 0, 0, 12, 4, 12, 99, 1], 0),
-            (vec![3, 3, 1105, 0, 9, 1101, 0, 0, 12, 4, 12, 99, 0], 0)
+            d.part2(vec![3, 3, 1105, -1, 9, 1101, 0, 0, 12, 4, 12, 99, 1], 0),
+            0
         );
-
         assert_eq!(
-            day2::process(&[3, 3, 1105, -1, 9, 1101, 0, 0, 12, 4, 12, 99, 1], 5),
-            (vec![3, 3, 1105, 5, 9, 1101, 0, 0, 12, 4, 12, 99, 1], 1)
+            d.part2(vec![3, 3, 1105, -1, 9, 1101, 0, 0, 12, 4, 12, 99, 1], 5),
+            1
         );
-
         assert_eq!(
-            day2::process(
-                &[
+            d.part2(
+                vec![
                     3, 21, 1008, 21, 8, 20, 1005, 20, 22, 107, 8, 21, 20, 1006, 20, 31, 1106, 0,
                     36, 98, 0, 0, 1002, 21, 125, 20, 4, 20, 1105, 1, 46, 104, 999, 1105, 1, 46,
                     1101, 1000, 1, 20, 4, 20, 1105, 1, 46, 98, 99
                 ],
                 7
             ),
-            (
-                vec![
-                    3, 21, 1008, 21, 8, 20, 1005, 20, 22, 107, 8, 21, 20, 1006, 20, 31, 1106, 0,
-                    36, 98, 0, 7, 1002, 21, 125, 20, 4, 20, 1105, 1, 46, 104, 999, 1105, 1, 46,
-                    1101, 1000, 1, 20, 4, 20, 1105, 1, 46, 98, 99
-                ],
-                999
-            )
+            999
         );
-
         assert_eq!(
-            day2::process(
-                &[
+            d.part2(
+                vec![
                     3, 21, 1008, 21, 8, 20, 1005, 20, 22, 107, 8, 21, 20, 1006, 20, 31, 1106, 0,
                     36, 98, 0, 0, 1002, 21, 125, 20, 4, 20, 1105, 1, 46, 104, 999, 1105, 1, 46,
                     1101, 1000, 1, 20, 4, 20, 1105, 1, 46, 98, 99
                 ],
                 8
             ),
-            (
-                vec![
-                    3, 21, 1008, 21, 8, 20, 1005, 20, 22, 107, 8, 21, 20, 1006, 20, 31, 1106, 0,
-                    36, 98, 1000, 8, 1002, 21, 125, 20, 4, 20, 1105, 1, 46, 104, 999, 1105, 1, 46,
-                    1101, 1000, 1, 20, 4, 20, 1105, 1, 46, 98, 99
-                ],
-                1000
-            )
+            1000
         );
-
         assert_eq!(
-            day2::process(
-                &[
+            d.part2(
+                vec![
                     3, 21, 1008, 21, 8, 20, 1005, 20, 22, 107, 8, 21, 20, 1006, 20, 31, 1106, 0,
                     36, 98, 0, 0, 1002, 21, 125, 20, 4, 20, 1105, 1, 46, 104, 999, 1105, 1, 46,
                     1101, 1000, 1, 20, 4, 20, 1105, 1, 46, 98, 99
                 ],
                 9
             ),
-            (
-                vec![
-                    3, 21, 1008, 21, 8, 20, 1005, 20, 22, 107, 8, 21, 20, 1006, 20, 31, 1106, 0,
-                    36, 98, 1001, 9, 1002, 21, 125, 20, 4, 20, 1105, 1, 46, 104, 999, 1105, 1, 46,
-                    1101, 1000, 1, 20, 4, 20, 1105, 1, 46, 98, 99
-                ],
-                1001
-            )
+            1001
         );
 
         let d = Day5::new("input/day5");
         let data = file_with_comma_to_vec(d.filename);
-        let r = d.part2(&data);
+        let r = d.part2(data, 5);
         assert_eq!(r, 11189491);
     }
 }
