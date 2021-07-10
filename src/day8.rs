@@ -48,9 +48,9 @@ impl Solver for Day8 {
     fn solve(&self) -> String {
         let data = std::fs::read_to_string(self.filename).unwrap();
         format!(
-            "Solution part1 -> {}\n\tSolution part2 -> {}",
-            self.part1(data, 25, 6),
-            0
+            "Solution part1 -> {}\n\tSolution part2 -> \n{}",
+            self.part1(data.clone(), 25, 6),
+            self.part2(data, 25, 6).replace("1", " ").replace("0", "X")
         )
     }
 }
@@ -118,6 +118,82 @@ impl Day8 {
     }
 }
 
+/*
+ * --- Part Two ---
+ * Now you're ready to decode the image. The image is rendered by stacking the layers and aligning the
+ * pixels with the same positions in each layer. The digits indicate the color of the corresponding pixel: 0 is black, 1 is white, and 2 is transparent.
+ *
+ * The layers are rendered with the first layer in front and the last layer in back.
+ * So, if a given position has a transparent pixel in the first and second layers, a black pixel in the third layer,
+ * and a white pixel in the fourth layer, the final image would have a black pixel at that position.
+ *
+ * For example, given an image 2 pixels wide and 2 pixels tall, the image data 0222112222120000 corresponds to the following image layers:
+ *
+ * Layer 1: 02
+ *          22
+ *
+ * Layer 2: 11
+ *          22
+ *
+ * Layer 3: 22
+ *          12
+ *
+ * Layer 4: 00
+ *          00
+ * Then, the full image can be found by determining the top visible pixel in each position:
+ *
+ * The top-left pixel is black because the top layer is 0.
+ * The top-right pixel is white because the top layer is 2 (transparent), but the second layer is 1.
+ * The bottom-left pixel is white because the top two layers are 2, but the third layer is 1.
+ * The bottom-right pixel is black because the only visible pixel in that position is 0 (from layer 4).
+ * So, the final image looks like this:
+ *
+ * 01
+ * 10
+ * What message is produced after decoding your image?
+ */
+
+fn get_image_look(layers: Vec<Vec<String>>, width: usize, height: usize) -> String {
+    let mut look = "".to_string();
+    let transparent = 2;
+
+    let mut w = 0;
+    let mut h = 0;
+    let mut idx = 0;
+    loop {
+        let lay = &layers[idx];
+        let candidate = lay[h].chars().nth(w).unwrap();
+        if candidate.to_digit(10).unwrap() != transparent {
+            look.push(candidate);
+            idx = 0;
+            w += 1;
+            if w >= width {
+                w = 0;
+                h += 1;
+                if h >= height {
+                    break;
+                } else {
+                    look.push('\n');
+                }
+            }
+        } else {
+            idx += 1;
+            if idx >= layers.len() {
+                break;
+            }
+        }
+    }
+
+    look
+}
+
+impl Day8 {
+    fn part2(&self, data: String, w: usize, h: usize) -> String {
+        let layers = decode_layer(data, w, h);
+        get_image_look(layers, w, h)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -131,5 +207,20 @@ mod tests {
         let data = std::fs::read_to_string(d.filename).unwrap();
         let r = d.part1(data, 25, 6);
         assert_eq!(r, 2460);
+
+        let d = Day8::new("");
+        assert_eq!(
+            d.part2("0222112222120000".to_string(), 2, 2),
+            "01\n10".to_string()
+        );
+
+        let d = Day8::new("input/day8");
+        let data = std::fs::read_to_string(d.filename).unwrap();
+        let r = d.part2(data, 25, 6);
+        assert_eq!(
+            r,
+            "1000011100111101001010010\n1000010010100001010010010\n1000010010111001100010010\n1000011100100001010010010\n1000010100100001010010010\n1111010010100001001001100"
+                .to_string()
+        );
     }
 }
